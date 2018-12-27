@@ -4,7 +4,9 @@
         <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
         <script src="https://unpkg.com/aframe-animation-component@^5.1.2/dist/aframe-animation-component.min.js"></script>
-        <!-- To add ar.js library later on -->
+
+        <!-- ar.js -->
+        <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.6.0/aframe/build/aframe-ar.js"></script>
     </head>
     <body>
         <script>
@@ -17,8 +19,6 @@
                     var data = this.data;
                     var initialScale = this.el.getAttribute('scale');
                     var from = initialScale.x + " " + initialScale.y + " " + initialScale.z;
-                    // console.log(from);
-                    // console.log(this.el.getAttribute('scale'));
                     this.el.addEventListener('mouseenter', function() {
                         this.setAttribute('scale', data.to);
                     });
@@ -29,7 +29,7 @@
             });
         </script>
 
-        <a-scene>
+        <a-scene embedded arjs='sourceType: webcam;'>
             <a-assets>
                 <img id="boxTexture" src="https://i.imgur.com/mYmmbrp.jpg">
                 <img id="skyTexture" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
@@ -60,9 +60,9 @@
             <a-sound src="#bgSound" position="-3 1 -4"></a-sound>
 
             <a-text value="Hello world!" color="#abcdef" position="-0.9 0.2 -3" scale="1.5 1.5 1.5"></a-text>
-            <a-camera>
+            <a-marker-camera preset='hiro'>
                 <a-cursor color="#eee"></a-cursor>
-            </a-camera>
+            </a-marker-camera>
         </a-scene>
     </body>
 </html>
