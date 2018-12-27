@@ -34,7 +34,7 @@
                 <img id="boxTexture" src="https://i.imgur.com/mYmmbrp.jpg">
                 <img id="skyTexture" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
                 <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
-                <audio src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav" autoplay preload></audio>
+                <audio id="bgSound" src="assets/backgroundnoise.wav" autoplay preload></audio>            
             </a-assets>
 
             <!-- Instead of using a-animation, use the animation component
@@ -57,8 +57,11 @@
             <a-light type="ambient" color="#445451"></a-light>
             <a-light type="point" intensity="3" position="2 10 4"></a-light>
 
+            <a-sound src="#bgSound" position="-3 1 -4"></a-sound>
+
+            <a-text value="Hello world!" color="#abcdef" position="-0.9 0.2 -3" scale="1.5 1.5 1.5"></a-text>
             <a-camera>
-                <a-cursor></a-cursor>
+                <a-cursor color="#eee"></a-cursor>
             </a-camera>
         </a-scene>
     </body>
