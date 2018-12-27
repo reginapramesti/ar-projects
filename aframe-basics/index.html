@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+        <!-- To add ar.js library later on -->
+    </head>
+    <body>
+        <a-scene>
+            <a-box src="https://i.imgur.com/mYmmbrp.jpg" rotation="0 45 45" position="0 2 -5" scale="0.5 0.5 0.5">
+                <a-cylinder position="1 0 3" color="red" rotation="0 -45 -45"></a-cylinder>
+            </a-box>
+
+            <a-entity environment="preset: forest; dressingAmount: 500; playArea: 1"></a-entity>
+
+            <a-sky color="#222"></a-sky>
+        </a-scene>
+    </body>
+</html>
