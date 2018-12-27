@@ -3,22 +3,58 @@
     <head>
         <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+        <script src="https://unpkg.com/aframe-animation-component@^5.1.2/dist/aframe-animation-component.min.js"></script>
         <!-- To add ar.js library later on -->
     </head>
     <body>
+        <script>
+            AFRAME.registerComponent('scale-on-mouseenter', {
+                schema: {
+                    to: {default: '2.5 2.5 2.5'}
+                },
+
+                init: function() {
+                    var data = this.data;
+                    var initialScale = this.el.getAttribute('scale');
+                    var from = initialScale.x + " " + initialScale.y + " " + initialScale.z;
+                    // console.log(from);
+                    // console.log(this.el.getAttribute('scale'));
+                    this.el.addEventListener('mouseenter', function() {
+                        this.setAttribute('scale', data.to);
+                    });
+                    this.el.addEventListener('mouseleave', function() {
+                        this.setAttribute('scale', from);
+                    });
+                }
+            });
+        </script>
+
         <a-scene>
             <a-assets>
                 <img id="boxTexture" src="https://i.imgur.com/mYmmbrp.jpg">
                 <img id="skyTexture" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
+                <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
             </a-assets>
 
-            <a-box src="#boxTexture" rotation="0 45 45" position="0 2 -5" scale="0.5 0.5 0.5">
-                <a-cylinder position="1 0 3" color="red" rotation="0 -45 -45"></a-cylinder>
+            <!-- Instead of using a-animation, use the animation component
+                provided by @supermedium. a-animation may be deprecated in the future -->
+            <a-box color="green" rotation="0 45 45" position="0 2 -5" scale="0.5 0.5 0.5"
+                animation="property: position; dur: 2000; to: 0 3 -5; dir: alternate; loop: true"
+                scale-on-mouseenter="to: 2.2 2.2 2.2">
             </a-box>
 
+            <!-- Preset environment created by @supermedium on GitHub -->
             <!-- <a-entity environment="preset: forest; dressingAmount: 500; playArea: 1"></a-entity> -->
 
             <a-sky src="#skyTexture"></a-sky>
+            <a-plane src="#groundTexture" rotation="-90 0 0" width="300" height="300" ></a-plane>
+
+            <a-light type="ambient" color="#445451"></a-light>
+            <a-light type="point" intensity="3" position="2 10 4"></a-light>
+
+            <a-camera>
+                <a-cursor></a-cursor>
+            </a-camera>
         </a-scene>
     </body>
 </html>
