@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+        <script src="https://unpkg.com/aframe-animation-component@^5.1.2/dist/aframe-animation-component.min.js"></script>
+        <script src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+
+        <!-- ar.js -->
+        <!-- <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.6.0/aframe/build/aframe-ar.js"></script> -->
+    </head>
+    <body>
+        <a-scene>
+
+            <!-- The flame model is created with the help of aframe-particle-system by @IdeaSpaceVR -->
+            <a-entity position="0 2.25 -15" particle-system="opacity: 0.5; positionSpread: 10 2 10; direction: -1; accelerationValue: 0 3 0; velocityValue: 0 5 0; size: 4; maxAge: 1; texture: images/smokeparticle.png; color: #eeb800,#cc5300, #710505"></a-entity>
+            <!-- <a-entity position="0 2.25 -15" particle-system="opacity: 0.5; positionSpread: 10 2 10; direction: -1; accelerationValue: 0 3 0; velocityValue: 0 5 0; size: 5; maxAge: 1; texture: images/smokeparticle.png; color: #ffc500,#cc5300"></a-entity> -->
+            <!-- <a-sphere color="orange" radius="0.5" position="0 0 -2" material="transparent: true; opacity: 0.5"></a-sphere> -->
+            <!-- <a-sphere material="shader: flat; color: red; transparent: true; opacity: 0.1" position="0.5 0 -2"></a-sphere>
+            <a-sphere material="shader: flat; color: red; transparent: true; opacity: 0.1" position="0 0 -2"></a-sphere> -->
+            <!-- <a-sphere material="shader: flat; color: red; transparent: true; opacity: 0.1" position="-0.5 0 -2"></a-sphere> -->
+
+            <!-- Preset environment created by @supermedium on GitHub -->
+            <!-- <a-entity environment="preset: forest; dressingAmount: 500; playArea: 1"></a-entity> -->
+
+            <a-sky color="#111"></a-sky>
+            <a-text value="Hello world!" color="#abcdef" position="-0.9 0.2 -3" scale="1.5 1.5 1.5"></a-text>
+            <a-camera>
+                <a-cursor color="#eee"></a-cursor>
+            </a-camera>
+        </a-scene>
+    </body>
+</html>
