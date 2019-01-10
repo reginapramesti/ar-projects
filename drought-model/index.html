@@ -111,11 +111,13 @@
         </script>
 
         <a-scene embedded arjs='sourceType: webcam;'>
+            <!-- This was causing issues. Should be placed outside the camera -->
+            <a-assets>
+                <a-asset-item id="tree-obj" src="GumTree/OBJ/GumtreeLowPoly.obj"></a-asset-item>
+                <a-asset-item id="tree-mtl" src="GumTree/OBJ/GumtreeLowPoly.mtl"></a-asset-item>
+            </a-assets>
+
             <a-marker-camera preset='hiro'>
-                <a-assets>
-                    <a-asset-item id="tree-obj" src="GumTree/OBJ/GumtreeLowPoly.obj"></a-asset-item>
-                    <a-asset-item id="tree-mtl" src="GumTree/OBJ/GumtreeLowPoly.mtl"></a-asset-item>
-                </a-assets>
                         
                 <a-entity obj-model="obj: #tree-obj; mtl: #tree-mtl" 
                             scale="0.2 0.2 0.2"
