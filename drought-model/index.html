@@ -12,7 +12,119 @@
         <!-- three.js script -->
     </head>
     <body>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
-        <script src="threejsscript.js"></script>
+        <script>
+            AFRAME.registerComponent('custom-animation', {
+                init: function () {
+                    this.el.addEventListener('model-loaded', (e) => {
+                        this.children = this.el.getObject3D('mesh').children;
+                        console.log(this.children);
+                        this.rotationSpeed = 0.01;
+                        this.maxRotationAngle = Math.PI / 2.5;
+                        this.opacitySpeed = 0.01;
+                        this.colChangeSpeed = 0.3;
+                        this.rgbNormalise = 255;
+                        this.numLeaves = 6;
+
+                        this.currRotation = 0; // how much the trunk has rotated
+                        this.currRGB = {r: 65, g: 117, b: 42}; // the colour of the leaves at any given time
+                        this.currOpacity = 1; // the opacity of the leaves
+
+                        // Phase 1: Colour change from dark green to yellowish green
+                        // Phase 2: Colour change from yellowish green to reddish brown
+                        // Phase 3: Leaves slowly turn transparent
+                        // Phase 4: Trunk of tree breaking and falling down
+                        this.phaseCount = 1;
+
+                        for (let i = 0; i < this.numLeaves; i++) {
+                            // Set the objects transparency to true, opacity to 1 initially
+                            this.children[i].material.transparent = true;
+                            this.children[i].material.opacity = 1;
+
+                            // No need for specular lighting
+                            this.children[i].material.specular = {r: 0, g: 0, b: 0};
+                        }
+                    })
+                },
+                tick: function (t, dt) {
+                    this.treeEventHandler();
+                    this.updateTreeModel();
+                },
+                updateTreeModel: function () {
+                    switch (this.phaseCount) {
+                        case 1:
+                            this.currRGB.r += this.colChangeSpeed;
+
+                            if (this.currRGB.r >= 117) 
+                                this.phaseCount += 1;
+                            break;
+
+                        case 2:
+                            this.currRGB.g -= this.colChangeSpeed;
+
+                            if (this.currRGB.g <= 70)
+                                this.phaseCount += 1;
+                            break;
+
+                        case 3:
+                            this.currOpacity -= this.opacitySpeed;
+                            if (this.currOpacity < 0) 
+                                this.phaseCount += 1;
+                            break;
+                        
+                        case 4:
+                            this.currRotation += this.rotationSpeed;
+                            if (this.currRotation > this.maxRotationAngle) 
+                                this.phaseCount += 1;
+                                
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                },
+                treeEventHandler: function () {
+                    switch (this.phaseCount) {
+                        case 1:
+                        case 2:
+                            for (let i = 0; i < this.numLeaves; i++) {
+                                this.children[i].material.color.r = this.currRGB.r / this.rgbNormalise;
+                                this.children[i].material.color.g = this.currRGB.g / this.rgbNormalise;
+                                this.children[i].material.color.b = this.currRGB.b / this.rgbNormalise;
+                            }
+                            break;
+                
+                        case 3:
+                            for (let i = 0; i < this.numLeaves; i++) {
+                                this.children[i].material.opacity = this.currOpacity;
+                            }
+                            break;
+
+                        case 4:
+                            this.children[7].rotation.z += this.rotationSpeed;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            })    
+        </script>
+
+        <a-scene embedded arjs='sourceType: webcam;'>
+            <a-assets>
+                <a-asset-item id="tree-obj" src="GumTree/OBJ/GumtreeLowPoly.obj"></a-asset-item>
+                <a-asset-item id="tree-mtl" src="GumTree/OBJ/GumtreeLowPoly.mtl"></a-asset-item>
+            </a-assets>
+                    
+            <a-entity obj-model="obj: #tree-obj; mtl: #tree-mtl" 
+                        scale="0.2 0.2 0.2"
+                        custom-animation
+                        position="0 0 -5"></a-entity>
+            <!-- <a-sky color="#111"></a-sky> -->
+            <!-- <a-text value="Hello world!" color="#abcdef" position="-0.9 0.2 -3" scale="1.5 1.5 1.5"></a-text> -->
+            <a-marker-camera preset='hiro'>
+                <a-cursor color="#eee"></a-cursor>
+            </a-marker-camera>
+        </a-scene>
     </body>
 </html>

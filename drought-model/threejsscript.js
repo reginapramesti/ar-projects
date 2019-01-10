@@ -2,6 +2,8 @@
 // https://www.learnthreejs.com/load-3d-model-using-three-js-obj-loader/
 // https://medium.com/@PavelLaptev/three-js-for-beginers-32ce451aabda
 
+// 3D Model of tree and animations implemented by Regina Pramesti
+
 var scene;
 var camera;
 var renderer;
@@ -26,7 +28,6 @@ function init() {
 }
 
 var treeModels = [];
-var objectLoaded = false;
 const numLeaves = 6;
 
 function loadObject(pathToObj, mtlFilename, objFilename) {
@@ -70,7 +71,6 @@ function loadObject(pathToObj, mtlFilename, objFilename) {
             treeModels.push(treeModel);
 
             scene.add(object);
-            objectLoaded = true;
         });
 
     });
@@ -147,10 +147,11 @@ var animate = function () {
     renderer.render(scene, camera);
     
     // Animate each tree in the array
-    treeModels.map(treeEventHandler);
-    treeModels.map(updateTreeModel);
+    // treeModels.map(treeEventHandler);
+    // treeModels.map(updateTreeModel);
 };
  
-init();
-loadObject('GumTree/OBJ/', 'GumtreeLowPoly.mtl', 'GumtreeLowPoly.obj');
-animate();
+// init();
+// loadObject('GumTree/OBJ/', 'GumtreeLowPoly.mtl', 'GumtreeLowPoly.obj');
+// animate();
+// document.querySelector('a-scene').sceneEl.object3D;
