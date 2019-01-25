@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+        <script src="https://unpkg.com/aframe-animation-component@^5.1.2/dist/aframe-animation-component.min.js"></script>
+        <script src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+        <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
+
+        <!-- ar.js -->
+        <!-- <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.6.0/aframe/build/aframe-ar.js"></script> -->
+    </head>
+    <body>
+        <a-scene>
+        <!-- <a-scene embedded arjs='sourceType: webcam;'> -->
+
+            <!-- The rain model is created with the help of aframe-particle-system by @IdeaSpaceVR -->
+            <a-entity position="0 2.25 -15" particle-system="preset: snow; texture: assets/raindrop.png; color: #03185e; particleCount: 1000; accelerationValue: 0 10 0; velocityValue: 0 10 0; maxAge: 10"></a-entity>
+
+            <!-- Ocean waves created by @donmccurdy on GitHub -->
+            <a-ocean color="#0e4e66" width="100" depth="100" density="15" speed="7" position="0 -10 0"
+                    animation__moveup="property: position; dur: 5000; to: 0 -1 0;"
+                    animation__speedinc="property: speed; dur: 5000; to: 10">
+            </a-ocean>
+
+            <a-sky color="#abcdef"></a-sky>
+            <a-camera position="0 0 5">
+                <a-cursor color="#eee"></a-cursor>
+            </a-camera>
+            <!-- <a-marker-camera preset="hiro">
+                <a-cursor color="#eee"></a-cursor>
+            </a-marker-camera> -->
+        </a-scene>
+    </body>
+</html>
