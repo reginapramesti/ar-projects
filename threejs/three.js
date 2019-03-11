@@ -15,13 +15,6 @@ var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 var geometry;
 var cartoonObject;
 // var geometry = new THREE.TorusKnotBufferGeometry(1, 0.3);
-var objectMaterial = new THREE.MeshToonMaterial({
-    color: diffuseColor,
-    specular: specularColor,
-    reflectivity: beta,
-    shininess: specularShininess,
-    side: THREE.FrontSide
-});
 var outlineMaterial = new THREE.MeshLambertMaterial({
     color: 'black',
     side: THREE.BackSide
@@ -36,17 +29,66 @@ outlineMaterial.onBeforeCompile = (shader) => {
 }
 const scale = 1.03;
 
+var treeGroups = [];
+
 var loader = new THREE.OBJLoader();
+
+// tree trunk: #a67344
+// tree leaves: #3b802f
 loader.load(
-    'KangarooModel/10666_Kangaroo_v2.obj',
+    'TreesLowPoly/trees.obj',
     function(object) {
-        const scaleToView = 0.05;
+        object.children.forEach(child => {
+            var treeGroup = new THREE.Group();
+            // Material for the tree leaves
+            child.material[0] = new THREE.MeshToonMaterial({
+                color: new THREE.Color(0xa67344),
+                specular: specularColor,
+                reflectivity: beta,
+                shininess: specularShininess,
+                side: THREE.FrontSide
+            });
+            // Material for the tree trunk
+            child.material[1] = new THREE.MeshToonMaterial({
+                color: new THREE.Color(0x3b802f),
+                specular: specularColor,
+                reflectivity: beta,
+                shininess: specularShininess,
+                side: THREE.FrontSide
+            });
+            treeGroup.add(child);
+            
+            var treeOutline = new THREE.Mesh(child.geometry, outlineMaterial);
+            treeOutline.scale.set(scale, scale, scale);
+            treeGroup.add(treeOutline);
+            // treeGroup.position.set(0, 0, 0);
+            treeGroups.push(treeGroup);
+            console.log(child);
+        });
+        treeGroups.forEach(treeGroup => {
+            scene.add(treeGroup);
+        })
+        // scene.add(treeGroups[0]);
+    }
+)
+
+loader.load(
+    'KangarooModel/Kangaroo.obj',
+    function(object) {
+        const scaleToView = 0.15;
         object.scale.set(0.01, 0.01, 0.01);
         object.rotation.x = -Math.PI / 2;
         object.rotation.z = Math.PI / 2;
         // scene.add(object);
         geometry = object.children[0].geometry;
-        console.log(object);
+
+        var objectMaterial = new THREE.MeshToonMaterial({
+            color: diffuseColor,
+            specular: specularColor,
+            reflectivity: beta,
+            shininess: specularShininess,
+            side: THREE.FrontSide
+        });
 
         var object = new THREE.Mesh(geometry, objectMaterial);
         var objectOutline = new THREE.Mesh(geometry, outlineMaterial);
@@ -56,11 +98,11 @@ loader.load(
         cartoonObject.add(object);
         cartoonObject.add(objectOutline);
         
-        cartoonObject.rotation.x = -Math.PI / 2;
-        cartoonObject.rotation.z = Math.PI / 2;
+        // cartoonObject.rotation.x = -Math.PI / 2;
+        cartoonObject.rotation.y = Math.PI / 2;
         cartoonObject.scale.set(scaleToView, scaleToView, scaleToView);
         
-        scene.add(cartoonObject);
+        // scene.add(cartoonObject);
         
     },
     function(xhr) {
@@ -79,7 +121,7 @@ directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
 camera.position.z = 20;
-camera.position.y = 5;
+camera.position.y = 2;
 
 function animate() {
     requestAnimationFrame(animate);
@@ -89,7 +131,10 @@ function animate() {
 function render() {
     if (cartoonObject) {
         // cartoonObject.rotation.x += 0.01;
-        cartoonObject.rotation.z += 0.01;
+        cartoonObject.rotation.y += 0.01;
+    }
+    if (treeGroups.length > 0) {
+        treeGroups[0].rotation.y += 0.01;
     }
     renderer.render(scene, camera);
 }
