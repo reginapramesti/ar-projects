@@ -182,7 +182,7 @@ function initialize()
     // tree leaves: #3b802f
 
     const range = 20 / 4;
-    const spacing = 6 / 4;
+    const spacing = 6 / 3;
     const noise = 2 / 4;
     var xPos = -range;
     var zPos = -range;
