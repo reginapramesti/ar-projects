@@ -40,7 +40,7 @@ loader.load(
     function(object) {
         object.children.forEach(child => {
             var treeGroup = new THREE.Group();
-            // Material for the tree leaves
+            // Material for the tree trunk
             child.material[0] = new THREE.MeshToonMaterial({
                 color: new THREE.Color(0xa67344),
                 specular: specularColor,
@@ -48,7 +48,7 @@ loader.load(
                 shininess: specularShininess,
                 side: THREE.FrontSide
             });
-            // Material for the tree trunk
+            // Material for the tree leaves
             child.material[1] = new THREE.MeshToonMaterial({
                 color: new THREE.Color(0x3b802f),
                 specular: specularColor,
@@ -63,11 +63,12 @@ loader.load(
             treeGroup.add(treeOutline);
             // treeGroup.position.set(0, 0, 0);
             treeGroups.push(treeGroup);
-            console.log(child);
+            console.log(child.geometry);
         });
         treeGroups.forEach(treeGroup => {
             scene.add(treeGroup);
         })
+        // console.log(treeGroups[0]);
         // scene.add(treeGroups[0]);
     }
 )

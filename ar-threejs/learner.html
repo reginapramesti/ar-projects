@@ -6,13 +6,6 @@
 <!-- include jsartookit -->
 <script src="jsartoolkit5/artoolkit.min.js"></script>
 <script src="jsartoolkit5/artoolkit.api.js"></script>
-<!-- aruco -->
-<script src='js-aruco/src/svd.js'></script> 
-<script src='js-aruco/src/posit1.js'></script> 
-<script src='js-aruco/src/cv.js'></script> 
-<script src='js-aruco/src/aruco.js'></script> 
-<script src='threex-aruco/threex-arucocontext.js'></script> 
-<script src='threex-aruco/threex-arucodebug.js'></script>
 <!-- include threex.artoolkit -->
 <script src="threex/threex-artoolkitsource.js"></script>
 <script src="threex/threex-artoolkitcontext.js"></script>
@@ -103,11 +96,11 @@
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// Create a camera
-	if( urlOptions.trackingBackend === 'aruco' ){
-		var camera = new THREE.PerspectiveCamera(42, renderer.domElement.width / renderer.domElement.height, 0.01, 100);
-	}else if( urlOptions.trackingBackend === 'artoolkit' ){
+	if (urlOptions.trackingBackend === 'artoolkit') {
 		var camera = new THREE.Camera();
-	}else console.assert(false)
+	} else {
+		console.assert(false)
+	}
 	scene.add(camera);
 	////////////////////////////////////////////////////////////////////////////////
 	//          handle arToolkitSource
@@ -133,16 +126,13 @@
 	function onResize(){
 		arToolkitSource.onResizeElement()
 		arToolkitSource.copyElementSizeTo(renderer.domElement)	
-		if( urlOptions.trackingBackend === 'aruco' ){
-			arToolkitSource.copyElementSizeTo(arToolkitContext.arucoContext.canvas)	
-
-			camera.aspect = renderer.domElement.width / renderer.domElement.height;
-			camera.updateProjectionMatrix();			
-		}else if( urlOptions.trackingBackend === 'artoolkit' ){
+		if (urlOptions.trackingBackend === 'artoolkit') {
 			if( arToolkitContext.arController !== null ){
-				arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)	
+				arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
 			}	
-		}else console.assert(false)
+		} else { 
+			console.assert(false);
+		}
 	}
 	////////////////////////////////////////////////////////////////////////////////
 	//          initialize arToolkitContext
