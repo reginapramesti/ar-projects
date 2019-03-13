@@ -22,7 +22,7 @@ function initialize()
 		alpha: true
 	});
 	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( 640, 480 );
+	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
@@ -130,7 +130,7 @@ function initialize()
     }
 
     var onTreesLoaded = function (treeObject) {
-        const treeSize = 3;
+        const treeSize = 1;
         var treeGroup = new THREE.Group();
 
         treeObject.children[0].material = treeMaterials;
