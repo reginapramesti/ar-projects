@@ -15,7 +15,6 @@ var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 var geometry;
 
 var loader = new THREE.OBJLoader();
-// var geometry = new THREE.TorusKnotBufferGeometry(1, 0.3);
 var outlineMaterial = new THREE.MeshLambertMaterial({
     color: 'black',
     side: THREE.BackSide
@@ -70,6 +69,7 @@ var onTreesLoaded = function(treeObject) {
     treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
     
     treeGroup.scale.set(treeSize, treeSize, treeSize);
+    treeGroup.rotation.y = Math.random() * Math.PI;
     treeGroups.push(treeGroup);
     scene.add(treeGroup);
 };
@@ -108,12 +108,32 @@ var loadObject = function(path, scale, diffuseColor) {
 
 // tree trunk: #a67344
 // tree leaves: #3b802f
-loader.load(
-    'TreesLowPoly/Tree1/tree.obj',
-    onTreesLoaded,
-    onObjectLoading,
-    onObjectLoadError
-);
+
+const range = 20;
+const spacing = 6;
+const noise = 2;
+var xPos = -range;
+var zPos = -range;
+var treePositions = [];
+
+while (xPos <= range) {
+    zPos = -range;
+    while (zPos <= range) {
+        let treeIndex = Math.floor(Math.random() * 5 + 1);
+        console.log(treeIndex);
+        loader.load(
+            'TreesLowPoly/Tree' + treeIndex + '/tree.obj',
+            onTreesLoaded,
+            onObjectLoading,
+            onObjectLoadError
+        );
+        var noiseX = Math.random() * noise * 2 - noise;
+        var noiseZ = Math.random() * noise * 2 - noise;
+        treePositions.push({x: xPos + noiseX, z: zPos + noiseZ});
+        zPos += spacing;
+    }
+    xPos += spacing;
+}
 
 loadObject('KangarooModel/Kangaroo.obj', 0.1, diffuseColor);
 
@@ -124,7 +144,7 @@ var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
-camera.position.z = 5;
+camera.position.z = 20;
 camera.position.y = 2;
 
 function animate() {
@@ -133,15 +153,14 @@ function animate() {
 }
 
 function render() {
-    treeGroups.forEach(treeGroup => {
-        treeGroup.rotation.y += 0.01;
+    treeGroups.forEach((treeGroup, index) => {
+        // treeGroup.rotation.y += 0.01;
+        treeGroup.position.set(treePositions[index].x, 0, treePositions[index].z);
     });
     objGroups.forEach(objGroup => {
-        objGroup.rotation.y += 0.01;
+        // objGroup.rotation.y += 0.01;
+        objGroup.rotation.y = -Math.PI / 2;
     })
-    // if (treeGroups.length > 0) {
-    //     treeGroups[].rotation.y += 0.01;
-    // }
     renderer.render(scene, camera);
 }
 
