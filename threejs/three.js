@@ -130,7 +130,7 @@ function initialize()
     }
 
     var onTreesLoaded = function (treeObject) {
-        const treeSize = 1;
+        const treeSize = 1/10;
         var treeGroup = new THREE.Group();
 
         treeObject.children[0].material = treeMaterials;
@@ -153,6 +153,7 @@ function initialize()
     }
 
     var loadObject = function (path, scale, diffuseColor) {
+        scale /= 10;
         loader.load(
             path,
             function (object) {
@@ -180,9 +181,9 @@ function initialize()
     // tree trunk: #a67344
     // tree leaves: #3b802f
 
-    const range = 20;
-    const spacing = 6;
-    const noise = 2;
+    const range = 20 / 10;
+    const spacing = 6 / 10;
+    const noise = 2 / 10;
     var xPos = -range;
     var zPos = -range;
 
