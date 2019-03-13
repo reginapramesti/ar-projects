@@ -13,7 +13,8 @@ var specularShininess = Math.pow(2, alpha * 10);
 var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 
 var geometry;
-var cartoonObject;
+
+var loader = new THREE.OBJLoader();
 // var geometry = new THREE.TorusKnotBufferGeometry(1, 0.3);
 var outlineMaterial = new THREE.MeshLambertMaterial({
     color: 'black',
@@ -26,92 +27,95 @@ outlineMaterial.onBeforeCompile = (shader) => {
     `
     shader.vertexShader = 
         shader.vertexShader.replace(token,customTransform)
-}
-const scale = 1.03;
+};
 
 var treeGroups = [];
+var objGroups = [];
 
-var loader = new THREE.OBJLoader();
+var treeOutlineMaterial = new THREE.MeshLambertMaterial({
+    color: 'black',
+    side: THREE.BackSide
+});
+
+var treeMaterials = [
+    new THREE.MeshToonMaterial({
+        color: new THREE.Color(0x3b802f),
+        specular: specularColor,
+        reflectivity: beta,
+        shininess: specularShininess,
+        side: THREE.FrontSide
+    }),
+    new THREE.MeshToonMaterial({
+        color: new THREE.Color(0xa67344),
+        specular: specularColor,
+        reflectivity: beta,
+        shininess: specularShininess,
+        side: THREE.FrontSide
+    })
+];
+
+var createOutline = function(geometry, material) {
+    const outlineScale = 1.03;
+    var objOutline = new THREE.Mesh(geometry, material);
+    objOutline.scale.set(outlineScale, outlineScale, outlineScale);
+    return objOutline;
+}
+
+var onTreesLoaded = function(treeObject) {
+    const treeSize = 3;
+    var treeGroup = new THREE.Group();
+
+    treeObject.children[0].material = treeMaterials;
+    treeGroup.add(treeObject);
+    treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
+    
+    treeGroup.scale.set(treeSize, treeSize, treeSize);
+    treeGroups.push(treeGroup);
+    scene.add(treeGroup);
+};
+
+var onObjectLoading = function(xhr) {
+    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+}
+
+var onObjectLoadError = function(error) {
+    console.log('An error has happened');
+}
+
+var loadObject = function(path, scale, diffuseColor) {
+    loader.load(
+        path,
+        function(object) {
+            var objGroup = new THREE.Group();
+
+            object.children[0].material = new THREE.MeshToonMaterial({
+                color: diffuseColor,
+                specular: specularColor,
+                reflectivity: beta,
+                shininess: specularShininess,
+                side: THREE.FrontSide
+            });
+            objGroup.add(object);
+            objGroup.add(createOutline(object.children[0].geometry, outlineMaterial));
+            objGroup.scale.set(scale, scale, scale);
+            scene.add(objGroup);
+            objGroups.push(objGroup);
+        },
+        onObjectLoading,
+        onObjectLoadError
+    )
+}
 
 // tree trunk: #a67344
 // tree leaves: #3b802f
 loader.load(
-    'TreesLowPoly/trees.obj',
-    function(object) {
-        object.children.forEach(child => {
-            var treeGroup = new THREE.Group();
-            // Material for the tree leaves
-            child.material[0] = new THREE.MeshToonMaterial({
-                color: new THREE.Color(0xa67344),
-                specular: specularColor,
-                reflectivity: beta,
-                shininess: specularShininess,
-                side: THREE.FrontSide
-            });
-            // Material for the tree trunk
-            child.material[1] = new THREE.MeshToonMaterial({
-                color: new THREE.Color(0x3b802f),
-                specular: specularColor,
-                reflectivity: beta,
-                shininess: specularShininess,
-                side: THREE.FrontSide
-            });
-            treeGroup.add(child);
-            
-            var treeOutline = new THREE.Mesh(child.geometry, outlineMaterial);
-            treeOutline.scale.set(scale, scale, scale);
-            treeGroup.add(treeOutline);
-            // treeGroup.position.set(0, 0, 0);
-            treeGroups.push(treeGroup);
-            console.log(child);
-        });
-        treeGroups.forEach(treeGroup => {
-            scene.add(treeGroup);
-        })
-        // scene.add(treeGroups[0]);
-    }
-)
-
-loader.load(
-    'KangarooModel/Kangaroo.obj',
-    function(object) {
-        const scaleToView = 0.15;
-        object.scale.set(0.01, 0.01, 0.01);
-        object.rotation.x = -Math.PI / 2;
-        object.rotation.z = Math.PI / 2;
-        // scene.add(object);
-        geometry = object.children[0].geometry;
-
-        var objectMaterial = new THREE.MeshToonMaterial({
-            color: diffuseColor,
-            specular: specularColor,
-            reflectivity: beta,
-            shininess: specularShininess,
-            side: THREE.FrontSide
-        });
-
-        var object = new THREE.Mesh(geometry, objectMaterial);
-        var objectOutline = new THREE.Mesh(geometry, outlineMaterial);
-        objectOutline.scale.set(scale, scale, scale);
-        
-        cartoonObject = new THREE.Group();
-        cartoonObject.add(object);
-        cartoonObject.add(objectOutline);
-        
-        // cartoonObject.rotation.x = -Math.PI / 2;
-        cartoonObject.rotation.y = Math.PI / 2;
-        cartoonObject.scale.set(scaleToView, scaleToView, scaleToView);
-        
-        // scene.add(cartoonObject);
-        
-    },
-    function(xhr) {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    function(error) {
-        console.log('An error has happened');
-    }
+    'TreesLowPoly/Tree1/tree.obj',
+    onTreesLoaded,
+    onObjectLoading,
+    onObjectLoadError
 );
+
+loadObject('KangarooModel/Kangaroo.obj', 0.1, diffuseColor);
 
 // Lighting
 scene.add(new THREE.AmbientLight(0x222222));
@@ -120,7 +124,7 @@ var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
-camera.position.z = 20;
+camera.position.z = 5;
 camera.position.y = 2;
 
 function animate() {
@@ -129,13 +133,15 @@ function animate() {
 }
 
 function render() {
-    if (cartoonObject) {
-        // cartoonObject.rotation.x += 0.01;
-        cartoonObject.rotation.y += 0.01;
-    }
-    if (treeGroups.length > 0) {
-        treeGroups[0].rotation.y += 0.01;
-    }
+    treeGroups.forEach(treeGroup => {
+        treeGroup.rotation.y += 0.01;
+    });
+    objGroups.forEach(objGroup => {
+        objGroup.rotation.y += 0.01;
+    })
+    // if (treeGroups.length > 0) {
+    //     treeGroups[].rotation.y += 0.01;
+    // }
     renderer.render(scene, camera);
 }
 
