@@ -1,16 +1,14 @@
 var scene, camera, renderer, clock, deltaTime, totalTime;
 var arToolkitSource, arToolkitContext;
 var markerRoot1, markerRoot2;
-var mesh1;
 
 var treeGroups = [];
 var objGroups = [];
 var treePositions = [];
 
-initialize();
+initialise();
 animate();
-function initialize()
-{
+function initialise() {
 	scene = new THREE.Scene();
 	let ambientLight = new THREE.AmbientLight( 0xcccccc, 0.5 );
 	scene.add( ambientLight );
@@ -83,8 +81,6 @@ function initialize()
     var diffuseColor = new THREE.Color(0xcd6237);
     var specularShininess = Math.pow(2, alpha * 10);
     var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
-
-    var geometry;
 
     var loader = new THREE.OBJLoader();
     var outlineMaterial = new THREE.MeshLambertMaterial({
@@ -209,14 +205,13 @@ function initialize()
     loadObject('KangarooModel/Kangaroo.obj', 0.1, diffuseColor);
 
 }
-function update()
-{
+function update() {
 	// update artoolkit on every frame
 	if ( arToolkitSource.ready !== false )
 		arToolkitContext.update( arToolkitSource.domElement );
 }
-function render()
-{
+
+function render() {
     treeGroups.forEach((treeGroup, index) => {
         // treeGroup.rotation.y += 0.01;
         treeGroup.position.set(treePositions[index].x, 0, treePositions[index].z);
@@ -225,10 +220,9 @@ function render()
         // objGroup.rotation.y += 0.01;
         objGroup.rotation.y = -Math.PI / 2;
     })
-	renderer.render( scene, camera );
+	renderer.render(scene, camera);
 }
-function animate()
-{
+function animate() {
 	requestAnimationFrame(animate);
 	deltaTime = clock.getDelta();
 	totalTime += deltaTime;

@@ -1,64 +1,14 @@
-var arToolkitSource, arToolkitContext;
-var markerRoot1, markerRoot2;
-
 var scene = new THREE.Scene();
-// scene.background = new THREE.Color(0x555555);
-// var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-var camera = new THREE.Camera();
+scene.background = new THREE.Color('skyblue');
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+// var camera = new THREE.Camera();
 scene.add(camera);
 
-var renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
-});
-renderer.setClearColor(new THREE.Color('lightgrey'), 0);
+var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-////////////////////////////////////////////////////////////
-// setup arToolkitSource
-////////////////////////////////////////////////////////////
-arToolkitSource = new THREEx.ArToolkitSource({
-    sourceType: 'webcam',
-});
-function onResize() {
-    arToolkitSource.onResize();
-    arToolkitSource.copySizeTo(renderer.domElement);
-    if (arToolkitContext.arController !== null) {
-        arToolkitSource.copySizeTo(arToolkitContext.arController.canvas);
-    }
-}
-arToolkitSource.init(function onReady() {
-    onResize();
-});
-
-// handle resize event
-window.addEventListener('resize', function () {
-    onResize();
-});
-
-////////////////////////////////////////////////////////////
-// setup arToolkitContext
-////////////////////////////////////////////////////////////	
-// create atToolkitContext
-arToolkitContext = new THREEx.ArToolkitContext({
-    cameraParametersUrl: 'data/camera_para.dat',
-    detectionMode: 'mono'
-});
-
-// copy projection matrix to camera when initialization complete
-arToolkitContext.init(function onCompleted() {
-    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-});
-////////////////////////////////////////////////////////////
-// setup markerRoots
-////////////////////////////////////////////////////////////
-// build markerControls
-markerRoot1 = new THREE.Group();
-scene.add(markerRoot1);
-let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
-    type: 'pattern', patternUrl: "data/hiro.patt",
-})
+controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 var alpha = 0;
 var beta = 0;
@@ -115,7 +65,9 @@ var createOutline = function (geometry, material) {
 }
 
 var onTreesLoaded = function (treeObject) {
-    const treeSize = 3;
+    wait = false;
+
+    const treeSize = 5;
     var treeGroup = new THREE.Group();
 
     treeObject.children[0].material = treeMaterials;
@@ -125,8 +77,8 @@ var onTreesLoaded = function (treeObject) {
     treeGroup.scale.set(treeSize, treeSize, treeSize);
     treeGroup.rotation.y = Math.random() * Math.PI;
     treeGroups.push(treeGroup);
-    // scene.add(treeGroup);
-    markerRoot1.add(treeGroup);
+    scene.add(treeGroup);
+
 };
 
 var onObjectLoading = function (xhr) {
@@ -153,8 +105,7 @@ var loadObject = function (path, scale, diffuseColor) {
             objGroup.add(object);
             objGroup.add(createOutline(object.children[0].geometry, outlineMaterial));
             objGroup.scale.set(scale, scale, scale);
-            // scene.add(objGroup);
-            markerRoot1.add(objGroup);
+            scene.add(objGroup);
             objGroups.push(objGroup);
         },
         onObjectLoading,
@@ -165,18 +116,19 @@ var loadObject = function (path, scale, diffuseColor) {
 // tree trunk: #a67344
 // tree leaves: #3b802f
 
-const range = 20;
-const spacing = 6;
+const spacing = 8; 
+const rangeX = spacing * 10;
+const rangeZ = spacing * 3;
 const noise = 2;
-var xPos = -range;
-var zPos = -range;
+var xPos = -rangeX;
+var zPos = -rangeZ;
 var treePositions = [];
 
-while (xPos <= range) {
-    zPos = -range;
-    while (zPos <= range) {
+while (xPos <= rangeX) {
+    zPos = -rangeZ;
+    while (zPos <= rangeZ) {
         let treeIndex = Math.floor(Math.random() * 5 + 1);
-        // console.log(treeIndex);
+        console.log(treeIndex);
         loader.load(
             'TreesLowPoly/Tree' + treeIndex + '/tree.obj',
             onTreesLoaded,
@@ -186,6 +138,7 @@ while (xPos <= range) {
         var noiseX = Math.random() * noise * 2 - noise;
         var noiseZ = Math.random() * noise * 2 - noise;
         treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
+
         zPos += spacing;
     }
     xPos += spacing;
@@ -210,10 +163,6 @@ function animate() {
 }
 
 function update() {
-    // update artoolkit on every frame
-    if (!arToolkitSource.ready) {
-        arToolkitContext.update(arToolkitSource.domElement);
-    }
 }
 
 function render() {
