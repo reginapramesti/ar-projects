@@ -116,10 +116,11 @@ var loadObject = function (path, scale, diffuseColor) {
 // tree trunk: #a67344
 // tree leaves: #3b802f
 
-const spacing = 8; 
-const rangeX = spacing * 10;
-const rangeZ = spacing * 3;
-const noise = 2;
+var spacing = 6; 
+var spacingDelta = 0.0005;
+var noise = 2;
+const rangeX = 200;
+const rangeZ = 80;
 var xPos = -rangeX;
 var zPos = -rangeZ;
 var treePositions = [];
@@ -139,8 +140,11 @@ while (xPos <= rangeX) {
         var noiseZ = Math.random() * noise * 2 - noise;
         treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
 
+        spacing += spacingDelta;
         zPos += spacing;
     }
+    spacingDelta += spacingDelta;
+    noise += spacingDelta;
     xPos += spacing;
 }
 
