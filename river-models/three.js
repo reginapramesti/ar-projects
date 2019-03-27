@@ -1,4 +1,4 @@
-var scene, camera, renderer, controls;
+var scene, camera, renderer, controls, stats;
 // var mesh;
 var water;
 var waterTexture;
@@ -10,6 +10,10 @@ var rcp85 = [{ "year": 2040, "rainfall": 0.91791856 }, { "year": 2050, "rainfall
 
 var stoneMeshes = [];
 var walls;
+var wallFrontObjects = [];
+var wallBackObjects = [];
+
+const baseLevel = 15;
 
 var createOutline = function (geometry, material) {
     const outlineScale = 1.03;
@@ -169,6 +173,9 @@ function initialise() {
     // controls.maxPolarAngle = Math.PI * 0.5;
     // controls.minDistance = 1000;
     // controls.maxDistance = 5000;
+    
+    stats = new Stats();
+    document.body.appendChild( stats.dom );
 
     var length = 10, width = 8;
 
@@ -189,7 +196,6 @@ function initialise() {
     const pebbleSpacing = 1.2;
     const pebblePadding = 5;
     const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
-    const baseLevel = 15;
     const riverWidth = 60 * pebbleSpacing + pebblePadding;
     var stoneMaterials = new THREE.MeshToonMaterial({ color: 0x786f74 });
     var shapes = createShapes();
@@ -245,83 +251,100 @@ function initialise() {
         }
     });
 
-    const wallLength = 600;
-    const wallHeight = baseLevel;
+    const partitions = 7;
+    const totalWallLength = 490;
+    const wallLength = totalWallLength / partitions; // 80 each section
     const wallDepth = 3;
-    const yRepeat = 0.5;
-    var wallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallDepth);
-    var wallTextureXY = THREE.ImageUtils.loadTexture("images/brickWall.jpg");
-    var wallTextureXZ = THREE.ImageUtils.loadTexture("images/brickWall.jpg");
-    var wallTextureYZ = THREE.ImageUtils.loadTexture("images/brickWall.jpg");
-    wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
+    const xRepeat = 15 / partitions;
+    const yRepeat = 0.3 / partitions;
+    const zPosition = (riverWidth / 2) + (wallDepth / 2); 
+    var wallHeight = baseLevel / partitions;
+
+    var wallTextureXZ = new THREE.TextureLoader().load("images/brickWall.jpg");
+    var wallTextureYZ = new THREE.TextureLoader().load("images/brickWall.jpg");
     wallTextureXZ.wrapS = wallTextureXZ.wrapT = THREE.RepeatWrapping;
     wallTextureYZ.wrapS = wallTextureYZ.wrapT = THREE.RepeatWrapping;
-    wallTextureXY.repeat.set(25, yRepeat);
-    wallTextureXZ.repeat.set(25, yRepeat * (wallDepth / wallHeight));
+    
+    wallTextureXZ.repeat.set(xRepeat, yRepeat * (wallDepth / wallHeight));
     wallTextureYZ.repeat.set(yRepeat * (wallDepth / wallHeight), yRepeat);
 
-    var wallMaterials = [
-        new THREE.MeshToonMaterial({map: wallTextureYZ}), // left
-        new THREE.MeshToonMaterial({map: wallTextureYZ}), // right
-        new THREE.MeshToonMaterial({map: wallTextureXZ}), // top
-        new THREE.MeshToonMaterial({map: wallTextureXZ}), // bottom
-        new THREE.MeshToonMaterial({map: wallTextureXY}), // front
-        new THREE.MeshToonMaterial({map: wallTextureXY}), // back
+    for (var p = 0; p < partitions; p++) {
+        var wallGeometry = new THREE.BoxGeometry(wallLength, wallHeight * (p + 1), wallDepth);
+        
+        let wallTextureXY = new THREE.TextureLoader().load("images/brickWall.jpg");
+        wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
+        wallTextureXY.repeat.set(xRepeat, yRepeat * (p + 1));
 
-    ]
-    // var wallMaterial = new THREE.MeshToonMaterial({map: wallTexture});
-    
-    const zPosition = (riverWidth / 2) + (wallDepth / 2); 
+        var wallMaterials = [
+            new THREE.MeshToonMaterial({map: wallTextureYZ}), // left
+            new THREE.MeshToonMaterial({map: wallTextureYZ}), // right
+            new THREE.MeshToonMaterial({map: wallTextureXZ}), // top
+            new THREE.MeshToonMaterial({map: wallTextureXZ}), // bottom
+            new THREE.MeshToonMaterial({map: wallTextureXY}), // front
+            new THREE.MeshToonMaterial({map: wallTextureXY}), // back
+        ]
+        
+        var wallFrontObject = new THREE.Group();
+        var wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
+        wallFrontObject.add(wallFront);
+        wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
 
-    var wallBackObject = new THREE.Group();
-    var wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
-    wallBackObject.add(wallBack);
-    wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
+        wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        wallFrontObject.position.y = (wallHeight / 2) * p;
+        wallFrontObject.position.z += zPosition;
+        wallFrontObjects.push(wallFrontObject);
+        scene.add(wallFrontObject);
+        
+        var wallBackObject = new THREE.Group();
+        var wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
+        wallBackObject.add(wallBack);
+        wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
-    wallBackObject.position.y += wallHeight / 2;
-    wallBackObject.position.z -= zPosition;
-    scene.add(wallBackObject);
+        wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        wallBackObject.position.y = (wallHeight / 2) * p;
+        wallBackObject.position.z -= zPosition;
+        wallBackObjects.push(wallBackObject);
+        scene.add(wallBackObject);
+    }
 
-    var wallFrontObject = new THREE.Group();
-    var wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
-    wallFrontObject.add(wallFront);
-    wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
-
-    wallFrontObject.position.y += wallHeight / 2;
-    wallFrontObject.position.z += zPosition;
-    scene.add(wallFrontObject);
 
     var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
-    waterTexture = new THREE.TextureLoader().load('images/watertiles.jpg', function (texture) {
+    waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(4, 0.5);
+        // texture.repeat.set(4, 0.5);
     });
     
-    water = new THREE.Mesh(waterGeometry, new THREE.MeshToonMaterial({
-        map: waterTexture
-    }))
-    // water = new THREE.Water(
-    //     waterGeometry,
-    //     {
-    //         textureWidth: 852,
-    //         textureHeight: 480,
-    //         waterNormals: waterTexture,
-    //         alpha: 1.0,
-    //         sunDirection: directionalLight.position.clone().normalize(),
-    //         sunColor: 0xffffff,
-    //         waterColor: 0x001e0f,
-    //         distortionScale: 3.7,
-    //         fog: scene.fog !== undefined
-    //     }
-    // );
-    water.rotation.x = - Math.PI / 2;
+    // water = new THREE.Mesh(waterGeometry, new THREE.MeshToonMaterial({
+    //     map: waterTexture
+    // }))
+    water = new THREE.Water(
+        waterGeometry,
+        {
+            textureWidth: 852,
+            textureHeight: 480,
+            waterNormals: waterTexture,
+            alpha: 1.0,
+            sunDirection: directionalLight.position.clone().normalize(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            distortionScale: 3.7,
+            fog: scene.fog !== undefined
+        }
+    );
+    water.rotation.x = -Math.PI / 2;
     scene.add(water);
 
     camera.position.z = 50;
 }
 
 function render() {
-    waterTexture.offset.x -= 0.0005;
+
+    var time = performance.now() * 0.001;
+    water.material.uniforms[ "time" ].value += 1.0 / 20.0;
+    // if (water.position.y <= baseLevel / 2) {
+    //     water.position.y += 0.02;
+    // }
+
     renderer.render(scene, camera);
 }
 
@@ -333,6 +356,7 @@ function animate() {
     requestAnimationFrame(animate);
     update();
     render();
+    stats.update();
 }
 
 initialise();
