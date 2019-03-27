@@ -148,7 +148,8 @@ while (xPos <= rangeX) {
     xPos += spacing;
 }
 
-loadObject('KangarooModel/Kangaroo.obj', 0.1, diffuseColor);
+// loadObject('KangarooModel/Kangaroo.obj', 0.1, diffuseColor);
+loadObject('BoneModel/bone.obj', 0.01, 0xffffff);
 
 // Lighting
 scene.add(new THREE.AmbientLight(0x222222));

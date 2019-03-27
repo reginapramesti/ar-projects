@@ -32,25 +32,112 @@ outlineMaterial.onBeforeCompile = (shader) => {
 
 function createShapes() {
 
-    var shape = new THREE.Shape();
-
+    var shapes = [];
     // Bottom to top
+
     // First pebble shape
     // Rotate -Math.PI / 15
+    var shape = new THREE.Shape();
     shape.moveTo(-3, 3);
-    shape.bezierCurveTo(-3, 4, -2.5, 5, -2, 5);
-    shape.lineTo(2, 5);
-    shape.bezierCurveTo(2.5, 5, 3, 4, 3, 3);
+    shape.bezierCurveTo(-3, 3.5, -2.5, 4, -2, 4);
+    shape.lineTo(2, 4);
+    shape.bezierCurveTo(2.5, 4, 3, 3.5, 3, 3);
     shape.lineTo(3, -3);
-    shape.bezierCurveTo(3, -4, 2.5, -5, 2, -5);
-    shape.lineTo(-2, -5);
-    shape.bezierCurveTo(-2.5, -5, -3, -4, -3, -3);
+    shape.bezierCurveTo(3, -3.5, 2.5, -4, 2, -4);
+    shape.lineTo(-2, -4);
+    shape.bezierCurveTo(-2.5, -4, -3, -3.5, -3, -3);
     shape.lineTo(-3, 3);
+    shapes.push(shape);
 
     // Second pebble shape
-    // shape.moveTo();
-    return shape;
+    // Rotate Math.PI / 60
+    shape = new THREE.Shape();
+    shape.moveTo(-2, 3.5);
+    shape.lineTo(2, 3.5);3
+    shape.bezierCurveTo(2.25, 3.5, 2.75, 3, 3, 2.5);
+    shape.lineTo(4, -2.5);
+    shape.bezierCurveTo(4, -3, 3.5, -3.5, 3, -3.5);
+    shape.lineTo(-2, -4);
+    shape.bezierCurveTo(-3, -4, -3.25, -3, -3.25, -2.5);
+    shape.lineTo(-3, 2.5);
+    shape.bezierCurveTo(-2.85, 3, -2.5, 3.5, -2, 3.5);
+    shapes.push(shape);
+
+    // Third pebble shape
+    // Rotate -Math.PI / 10
+    shape = new THREE.Shape();
+    shape.moveTo(-3.5, 2);
+    shape.bezierCurveTo(-3.5, 2.5, -3, 3, -2.5, 3);
+    shape.lineTo(4.5, 3);
+    shape.bezierCurveTo(4.75, 3, 5.25, 2.67, 5, 2);
+    shape.lineTo(3.5, -2);
+    shape.bezierCurveTo(3.25, -2.67, 2.75, -3, 2.5, -3);
+    shape.lineTo(-2.5, -3);
+    shape.bezierCurveTo(-3, -3, -3.5, -2.5, -3.5, -2);
+    shape.lineTo(-3.5, 2);
+    shapes.push(shape);
+
+    // Fourth pebble shape
+    // Rotate -Math.PI / 18;
+    shape = new THREE.Shape();
+    shape.moveTo(-3, 2);
+    shape.bezierCurveTo(-3, 2.75, -2.75, 3, -2, 3);
+    shape.lineTo(2, 3);
+    shape.bezierCurveTo(2.75, 3, 3, 2.75, 3, 2);
+    shape.lineTo(3, -2);
+    shape.bezierCurveTo(3, -2.75, 2.75, -3, 2, -3);
+    shape.lineTo(-2, -3);
+    shape.bezierCurveTo(-2.75, -3, -3, -2.75, -3, -2);
+    shape.lineTo(-3, 2);
+    shapes.push(shape);
+
+    // Fifth pebble shape
+    // Rotate 0
+    shape = new THREE.Shape();
+    shape.moveTo(-4, 2);
+    shape.bezierCurveTo(-4.1, 2.8, -3.25, 3, -3, 3);
+    shape.lineTo(3, 3);
+    shape.bezierCurveTo(3.25, 3, 4.75, 3, 4.5, 2);
+    shape.lineTo(3.5, -2);
+    shape.bezierCurveTo(3.4, -2.4, 3, -3, 2.5, -3);
+    shape.lineTo(-2, -3);
+    shape.bezierCurveTo(-2.5, -3, -3.25, -3, -3.5, -2);
+    shape.lineTo(-4, 2);
+    shapes.push(shape);
+
+    // Sixth pebble shape
+    // Rotate 0
+    shape = new THREE.Shape();
+    shape.moveTo(-5, 2);
+    shape.bezierCurveTo(-5.28125, 2.75, -5, 3, -2, 3);
+    shape.lineTo(2, 3);
+    shape.bezierCurveTo(2.5, 3, 3.5, 3, 4, 2);
+    shape.lineTo(5, 0);
+    shape.bezierCurveTo(6, -2, 6, -3, 2, -3);
+    shape.lineTo(-2, -3);
+    shape.bezierCurveTo(-3, -3, -3.40625, -2.25, -3.5, -2);
+    shape.lineTo(-5, 2);
+    shapes.push(shape);
+    
+    return shapes;
 }
+
+// Inspired by https://discourse.threejs.org/t/round-edged-box/1402
+function createRoundedPebblesGeometry( shape, depth, radius0, smoothness ) {
+    let eps = 0.00001;
+    let radius = radius0 - eps;
+    let geometry = new THREE.ExtrudeGeometry( shape, {
+      amount: depth - radius0 * 2,
+      bevelEnabled: true,
+      bevelSegments: smoothness * 2,
+      steps: 1,
+      bevelSize: radius,
+      bevelThickness: radius0,
+      curveSegments: smoothness
+    });
+    
+    return geometry;
+  }
 
 function initialise() {
     scene = new THREE.Scene();
@@ -96,39 +183,66 @@ function initialise() {
 
 
 
-    const dataScaleFactor = 2;
+    const dataScaleFactor = 3;
     const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
+    const yOffset = 2;
     const pebbleSpacing = 1.2;
     const pebblePadding = 5;
-    const pebbleRotation = -Math.PI / 15;
+    const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
     const baseLevel = 15;
     const riverWidth = 60 * pebbleSpacing + pebblePadding;
-    var stoneMaterial = new THREE.MeshToonMaterial({ color: 0x8b8c8d });
+    var stoneMaterials = new THREE.MeshToonMaterial({ color: 0x786f74 });
+    var shapes = createShapes();
+    const stoneScale = 0.7;
+    const pebbleDepth = 8;
+    const bevelRadius = pebbleDepth / 2 + 0.1;
+    const rotationNoise = 0;//Math.PI / 3;
 
     rcp60.forEach((rainfallValue, index) => {
 
-        let pebbleDepth = baseLevel + rainfallValue.rainfall * dataScaleFactor;
-        let extrudeSettings = {
-            steps: 2,
-            depth: pebbleDepth,
-            bevelEnabled: false
-        };
+        let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
+        // let extrudeSettings = {
+        //     steps: 2,
+        //     depth: pebbleDepth,
+        //     bevelEnabled: true,
+        //     bevelSegments: 2,
+        //     steps: 1,
+        //     bevelSize: 2,
+        //     bevelThickness: 2
+        // };
 
-        // TODO: modify the shape based on which one we are dealing with;
-        let geometry = new THREE.ExtrudeBufferGeometry(createShapes(), extrudeSettings);
+        // let geometry = new THREE.ExtrudeBufferGeometry(shapes[index], extrudeSettings);
 
-        let mesh = new THREE.Mesh(geometry, stoneMaterial);
-
-        let stoneObject = new THREE.Group();
-        stoneObject.add(mesh);
-        stoneObject.add(createOutline(geometry, outlineMaterial));
-        
-        stoneObject.position.z += (zOffset - rainfallValue.year) * pebbleSpacing;
-        stoneObject.rotation.x = -Math.PI / 2;
-        stoneObject.rotation.z = pebbleRotation; // rotation along the y axis when upright
-
-        stoneMeshes.push(stoneObject);
-        scene.add(stoneObject);
+        for (let pebbleIx = 0; pebbleIx < pebbleCount; pebbleIx++) {
+            let geometry = createRoundedPebblesGeometry(shapes[index], pebbleDepth, bevelRadius, 4);
+            
+            // Inspired by https://stackoverflow.com/questions/51509292/threejs-hemisphere
+            for (var i = 0; i < geometry.vertices.length; i++) {
+                var vertex = geometry.vertices[i];
+                if (vertex.z > 0) {
+                    vertex.z = 0;
+                }
+            }
+              
+            geometry.computeFaceNormals();
+            geometry.computeVertexNormals();
+            geometry.verticesNeedUpdate = true;
+    
+            let mesh = new THREE.Mesh(geometry, stoneMaterials);
+            
+            let stoneObject = new THREE.Group();
+            stoneObject.add(mesh);
+            stoneObject.add(createOutline(geometry, outlineMaterial));
+            stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
+    
+            stoneObject.position.z += (zOffset - rainfallValue.year) * pebbleSpacing;
+            stoneObject.position.y = yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
+            stoneObject.rotation.x = -Math.PI / 2;
+            stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
+    
+            stoneMeshes.push(stoneObject);
+            scene.add(stoneObject);
+        }
     });
 
     const wallLength = 600;
