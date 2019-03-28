@@ -694,7 +694,7 @@
 			}
 		);
 		water.rotation.x = -Math.PI / 2;
-		water.position.y = 0;
+		water.position.y = -50;
 		water.position.z = 0;
 		// water.position.y = -100;
 		// water.position.z = 100;
@@ -702,7 +702,7 @@
 
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 100.0;
-			water.position.y -= 0.1;
+			// water.position.y -= 0.1;
 			water.position.z -= 0.1;
 		});
 	}
