@@ -669,8 +669,8 @@
 			wallBackObject.add(wallBack);
 			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
-			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallBackObject.position.x = -(totalWallLength / 2) + (partitions - p) * wallLength;
+			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * (partitions - p);
 			wallBackObject.position.z = -zPosition;
 			wallBackObject.position.z += zTotalOffset;
 			wallBackObjects.push(wallBackObject);
