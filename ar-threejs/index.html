@@ -254,6 +254,16 @@
 	//////////////////////////////////////////////////////////////////////////////////
 	var wildlifeInit = function(scene) {
 
+		// Setup the sound files
+		var forestSE = new Audio("audio/rainforestambience.mp3");
+		forestSE.loop = true;
+		
+		var listener = new THREE.AudioListener();
+		var audio = new THREE.Audio(listener);
+		audio.setMediaElementSource(forestSE);
+
+		forestSE.play();
+
 		const yTotalOffset = -50;
 
 		var worldScale = 2;
