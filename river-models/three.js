@@ -247,6 +247,7 @@ function initialise() {
             stoneObject.position.z += zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
             stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
             stoneObject.rotation.x = -Math.PI / 2;
+            stoneObject.rotation.y = Math.PI;
             stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
     
             stoneMeshes.push(stoneObject);
@@ -292,8 +293,8 @@ function initialise() {
         wallFrontObject.add(wallFront);
         wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
 
-        wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+        wallFrontObject.position.x = -(totalWallLength / 2) + (partitions - p) * wallLength;
+        wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * (partitions - p);
         wallFrontObject.position.z = zPosition;
         wallFrontObject.position.z += zTotalOffset;
         wallFrontObjects.push(wallFrontObject);
@@ -304,10 +305,11 @@ function initialise() {
         wallBackObject.add(wallBack);
         wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
-        wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+        wallBackObject.position.x = -(totalWallLength / 2) + (partitions - p) * wallLength;
+        wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * (partitions - p);
         wallBackObject.position.z = -zPosition;
         wallBackObject.position.z += zTotalOffset;
+        wallFrontObject.rotation.z = Math.PI;
         wallBackObjects.push(wallBackObject);
         scene.add(wallBackObject);
     }
