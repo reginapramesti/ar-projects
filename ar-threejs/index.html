@@ -29,7 +29,7 @@
 	<script src="js/OrbitControls.js"></script>
 	<script src="js/Water.js"></script>
 	<!-- <script src="js/river-model.js"></script> -->
-	<script src="js/wildlife-model.js"></script>
+	<!-- <script src="js/wildlife-model.js"></script> -->
 </head>
 
 
@@ -252,8 +252,8 @@
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise wildlife model
 	//////////////////////////////////////////////////////////////////////////////////
-
 	var wildlifeInit = function(scene) {
+		var worldScale = 2;
 		var alpha = 0;
 		var beta = 0;
 		var diffuseColor = new THREE.Color(0xcd6237);
@@ -273,6 +273,11 @@
 			shader.vertexShader =
 				shader.vertexShader.replace(token, customTransform)
 		};
+
+		var treeGroups = [];
+		var treeModels = [];
+		var objGroups = [];
+		var treePositions = [];
 
 		var treeOutlineMaterial = new THREE.MeshLambertMaterial({
 			color: 'black',
@@ -296,6 +301,10 @@
 			})
 		];
 
+		var objectsLoaded = 0;
+		var kangarooModel;
+		var boneModel;
+
 		var createOutline = function (geometry, material) {
 			const outlineScale = 1.03;
 			var objOutline = new THREE.Mesh(geometry, material);
@@ -305,35 +314,32 @@
 
 		var onTreesLoaded = function (treeObject) {
 			wait = false;
-
-			const treeSize = 5;
 			var treeGroup = new THREE.Group();
 
 			treeObject.children[0].material = treeMaterials;
-			treeGroup.add(treeObject);
-			treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
+			// treeGroup.add(treeObject);
+			// treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
+			treeModels.push(treeObject.children[0]); 
+			objectsLoaded++;
 
-			treeGroup.scale.set(treeSize, treeSize, treeSize);
-			treeGroup.rotation.y = Math.random() * Math.PI;
-			treeGroups.push(treeGroup);
-			// scene.add(treeGroup);
-
+			console.log("treeModels in onTreesLoaded");
+			console.log(treeModels);
+			if (objectsLoaded == 7)
+				populateForest();
 		};
 
 		var onObjectLoading = function (xhr) {
-			// console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+			console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 		}
 
 		var onObjectLoadError = function (error) {
-			console.log(error);
+			console.log('An error has happened');
 		}
 
-		var loadObject = function (path, scale, diffuseColor) {
+		var loadObject = function (path, scale, diffuseColor, model) {
 			loader.load(
 				path,
 				function (object) {
-					console.log(object);
-					var objGroup = new THREE.Group();
 
 					object.children[0].material = new THREE.MeshToonMaterial({
 						color: diffuseColor,
@@ -342,65 +348,103 @@
 						shininess: specularShininess,
 						side: THREE.FrontSide
 					});
-					objGroup.add(object);
-					objGroup.add(createOutline(object.children[0].geometry, outlineMaterial));
-					objGroup.scale.set(scale, scale, scale);
-					scene.add(objGroup);
-					objGroups.push(objGroup);
+					if (model == 0) {
+						kangarooModel = object.children[0];
+					} else if (model == 1) {
+						boneModel = object.children[0];
+					}
+					objectsLoaded++;
+
+					if (objectsLoaded == 7)
+						populateForest();
 				},
 				onObjectLoading,
 				onObjectLoadError
 			)
 		}
 
+		for (let treeIndex = 1; treeIndex <= 5; treeIndex++) {
+			loader.load(
+				'obj/Tree' + treeIndex + '/tree.obj',
+				onTreesLoaded,
+				onObjectLoading,
+				onObjectLoadError
+			);
+		}
+		loadObject('obj/Kangaroo.obj', 0.2 * worldScale, diffuseColor, 0);
+		loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
+
 		// tree trunk: #a67344
 		// tree leaves: #3b802f
 
-		var spacing = 6; 
-		var spacingDelta = 0.0005;
-		var noise = 2;
-		const rangeX = 200;
-		const rangeZ = 80;
-		var xPos = -rangeX;
-		var zPos = -rangeZ;
+		var populateForest = function() {
+			var spacing = 8 * worldScale; 
+			var spacingDelta = 0.05 * worldScale;
+			var noise = 2 * worldScale;
+			const rangeX = 50 * worldScale;
+			const rangeZ = 20 * worldScale;
+			var xPos = -rangeX;
+			var zPos = -rangeZ;
+			var kangaCount = Math.floor(rangeX / 3 / worldScale);
+			var boneCount = 0;
 
-		while (xPos <= rangeX) {
-			zPos = -rangeZ;
-			while (zPos <= rangeZ) {
-				let treeIndex = Math.floor(Math.random() * 5 + 1);
-				// console.log(treeIndex);
-				loader.load(
-					'obj/Tree' + treeIndex + '/tree.obj',
-					onTreesLoaded,
-					onObjectLoading,
-					onObjectLoadError
-				);
-				var noiseX = Math.random() * noise * 2 - noise;
-				var noiseZ = Math.random() * noise * 2 - noise;
-				treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
-
-				spacing += spacingDelta;
-				zPos += spacing;
+			const treeSize = 10 * worldScale;
+			
+			while (xPos <= rangeX) {
+				zPos = -rangeZ;
+				while (zPos <= rangeZ) {
+					let treeIndex = Math.floor(Math.random() * 5 + 1);
+					let treeMesh = treeModels[treeIndex - 1].clone();
+					let treeObject = new THREE.Group();
+					treeObject.add(treeMesh);
+					treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
+					treeObject.scale.set(treeSize, treeSize, treeSize);
+					treeObject.rotation.y = Math.random() * Math.PI;
+					var noiseX = Math.random() * noise * 2 - noise;
+					var noiseZ = Math.random() * noise * 2 - noise;
+					treeObject.position.set(xPos + noiseX, 0, zPos + noiseZ);
+					scene.add(treeObject);
+					treeGroups.push(treeObject);
+					// treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
+			
+					spacing += spacingDelta;
+					zPos += spacing;
+				}
+				spacingDelta += spacingDelta;
+				noise += spacingDelta;
+				xPos += spacing;
+			
+				for (let k = 0; k < kangaCount; k++) {
+					const kangaScale = 0.2 * worldScale;
+					let kangarooXPos = xPos + Math.random() * noise * 6 - noise;
+					let kangarooZPos = Math.random() * rangeZ * 2 - rangeZ;
+					let kangaroo = kangarooModel.clone();
+					let kangarooObject = new THREE.Group();
+					kangarooObject.add(kangaroo);
+					kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
+					kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
+					kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
+					kangarooObject.position.set(kangarooXPos, 0, kangarooZPos);
+					scene.add(kangarooObject);
+				}
+				for (let b = 0; b < boneCount; b++) {
+					const boneScale = 0.008 * worldScale;
+					let boneXPos = xPos + Math.random() * noise * 6 - noise;
+					let boneZPos = Math.random() * rangeZ * 2 - rangeZ;
+					let bone = boneModel.clone();
+					let boneObject = new THREE.Group();
+					boneObject.add(bone);
+					boneObject.add(createOutline(bone.geometry, outlineMaterial));
+					boneObject.rotation.y = Math.random() * 2 * Math.PI;
+					boneObject.scale.set(boneScale, boneScale, boneScale);
+					boneObject.position.set(boneXPos, 0, boneZPos);
+					scene.add(boneObject);
+				}
+			
+				kangaCount -= 2 * worldScale;
+				boneCount += 0.5 * worldScale;
 			}
-			spacingDelta += spacingDelta;
-			noise += spacingDelta;
-			xPos += spacing;
 		}
-
-		loadObject('obj/Kangaroo.obj', 0.1, diffuseColor);
-		// loadObject('obj/bone.obj', 0.01, new THREE.Color(0xffffff));
-
-
-		onRenderFcts.push(function() {
-			treeGroups.forEach((treeGroup, index) => {
-				// treeGroup.rotation.y += 0.01;
-				treeGroup.position.set(treePositions[index].x, 0, treePositions[index].z);
-			});
-			objGroups.forEach(objGroup => {
-				// objGroup.rotation.y += 0.01;
-				objGroup.rotation.y = -Math.PI / 2;
-			});
-		});
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -554,32 +598,6 @@
 			return geometry;
 		}
 
-		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
-		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
-			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-		});
-
-		water = new THREE.Water(
-			waterGeometry,
-			{
-				textureWidth: 852,
-				textureHeight: 480,
-				waterNormals: waterTexture,
-				alpha: 1.0,
-            	sunDirection: directionalLight.position.clone().normalize(),
-				sunColor: 0xffffff,
-				waterColor: 0x79cfe5,
-				distortionScale: 3.7,
-				fog: scene.fog !== undefined
-			}
-		);
-		water.rotation.x = -Math.PI / 2;
-		water.position.y = yTotalOffset;
-		water.position.z = zTotalOffset;
-		// water.position.y = -100;
-		// water.position.z = 100;
-		scene.add(water);
-
 		const dataScaleFactor = 6;
 		const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
 		const yOffset = 2;
@@ -620,7 +638,7 @@
 				stoneObject.add(createOutline(geometry, outlineMaterial));
 				stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
 
-				stoneObject.position.z += zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
+				stoneObject.position.z = zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
 				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
 				stoneObject.rotation.x = -Math.PI / 2;
 				// stoneObject.rotation.y = Math.PI; // seems to be rotated 180 degrees?
@@ -630,6 +648,31 @@
 				scene.add(stoneObject);
 			}
 		});
+		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
+		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+		});
+
+		water = new THREE.Water(
+			waterGeometry,
+			{
+				textureWidth: 852,
+				textureHeight: 480,
+				waterNormals: waterTexture,
+				alpha: 1.0,
+            	sunDirection: directionalLight.position.clone().normalize(),
+				sunColor: 0xffffff,
+				waterColor: 0x79cfe5,
+				distortionScale: 3.7,
+				fog: scene.fog !== undefined
+			}
+		);
+		water.rotation.x = -Math.PI / 2;
+		water.position.y = yTotalOffset;
+		water.position.z = zTotalOffset;
+		// water.position.y = -100;
+		// water.position.z = 100;
+		scene.add(water);
 
 		const partitions = 7;
 		const totalWallLength = 490;
@@ -648,14 +691,15 @@
 		wallTextureXZ.repeat.set(xRepeat, yRepeat * (wallDepth / wallHeight));
 		wallTextureYZ.repeat.set(yRepeat * (wallDepth / wallHeight), yRepeat);
 
-		for (var p = 0; p < partitions; p++) {
-			var wallGeometry = new THREE.BoxGeometry(wallLength, wallHeight * (p + 1), wallDepth);
+		// for (var p = 0; p < partitions; p++) {
+			var p = 4;
+			let wallGeometry = new THREE.BoxBufferGeometry(wallLength, wallHeight * (p + 1), wallDepth);
 
 			let wallTextureXY = new THREE.TextureLoader().load("images/brickWall.jpg");
 			wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
 			wallTextureXY.repeat.set(xRepeat, yRepeat * (p + 1));
 
-			var wallMaterials = [
+			let wallMaterials = [
 				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // left
 				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // right
 				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // top
@@ -664,34 +708,61 @@
 				new THREE.MeshToonMaterial({ map: wallTextureXY }), // back
 			]
 
-			var wallFrontObject = new THREE.Group();
-			var wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
-			wallFrontObject.add(wallFront);
-			wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
+			// let wallFrontObject = new THREE.Group();
+			// let wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
+			// wallFrontObject.add(wallFront);
+			// wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
+
+			// wallFront.position.x = -(totalWallLength / 2) + p * wallLength;
+        	// wallFront.position.y = yTotalOffset + (wallHeight / 2) * p;
+			// wallFront.position.z = zPosition;
+			// wallFront.position.z += zTotalOffset;
 
 			// (partitions - p) because the entire wall seems to be rotated by 180 degrees.
-			wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallFrontObject.position.z = zPosition;
-			wallFrontObject.position.z += zTotalOffset;
-			wallFrontObjects.push(wallFrontObject);
-			scene.add(wallFrontObject);
+			// wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        	// wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			// wallFrontObject.position.z = zPosition;
+			// wallFrontObject.position.z += zTotalOffset;
+			// wallFrontObjects.push(wallFrontObject);
+			// scene.add(wallFront);
 
-			var wallBackObject = new THREE.Group();
-			var wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
-			wallBackObject.add(wallBack);
-			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
+			// let wallBackObject = new THREE.Group();
+			let wallBack = new THREE.Mesh(wallGeometry, wallMaterials); 
+			// wallBackObject.add(wallBack);
+			// wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
+			
+			wallBack.position.x = -(totalWallLength / 2) + p * wallLength;
+			wallBack.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallBack.position.z = -zPosition;
+			// wallBack.position.z += zTotalOffset;
 
-			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallBackObject.position.z = -zPosition;
-			wallBackObject.position.z += zTotalOffset;
-			wallBackObjects.push(wallBackObject);
-			scene.add(wallBackObject);
-		}
+			// wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
+			// wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			// wallBackObject.position.z = -zPosition;
+			// wallBackObject.position.z += zTotalOffset;
+			// wallBackObjects.push(wallBackObject);
+			scene.add(wallBack);
+		// }
+
+		// var meshGroup = new THREE.Group();
+		// var geometry = new THREE.CubeGeometry(10, 10, 10);
+		// var material = new THREE.MeshLambertMaterial({
+		// 	color: 0xff0000
+		// });
+		// var someMesh = new THREE.Mesh(geometry, material);
+		// // meshGroup.add(someMesh);
+		// // meshGroup.add(createOutline(geometry, outlineMaterial));
+		// // someMesh.position.y	= geometry.parameters.height/2
+		// someMesh.position.x = 1;
+		// someMesh.position.y = 1;
+		// someMesh.position.z = 1;
+		// scene.add(someMesh);
 
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
+			// console.log(water.rotation);
+			// console.log(wallBackObjects[0].rotation);
+			// console.log(stoneMeshes[0].rotation);
 			// water.position.y -= 0.1;
 			// water.position.z -= 0.1;
 		});
@@ -726,15 +797,14 @@
 		// mesh.position.y	= geometry.parameters.height/2
 		// arWorldRoot.add(mesh)
 		
-		// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-		// var material	= new THREE.MeshLambertMaterial( {
-		// 	color: 0xffffff
-		// }); 
-		// var mesh	= new THREE.Mesh( geometry, material );
-		// mesh.position.y	= 0.5
-		// arWorldRoot.add( mesh );
-		// wildlifeInit(arWorldRoot);
-		riverInit(arWorldRoot);
+		var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
+		var material	= new THREE.MeshNormalMaterial();
+		var mesh	= new THREE.Mesh( geometry, material );
+		mesh.position.y	= 0.5
+		arWorldRoot.add( mesh );
+		wildlifeInit(arWorldRoot);
+		// riverInit(arWorldRoot);
+		console.log(arWorldRoot);
 	})()
 
 	//////////////////////////////////////////////////////////////////////////////////
