@@ -554,18 +554,31 @@
 			return geometry;
 		}
 
-		var length = 10, width = 8;
+		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
+		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+		});
 
-		// Generic rectangle shape.
-		var shape = new THREE.Shape();
-		// centre at the origin
-		shape.moveTo(-length / 2, -width / 2);
-		shape.lineTo(-length / 2, width / 2);
-		shape.lineTo(length / 2, width / 2);
-		shape.lineTo(length / 2, -width / 2);
-		shape.lineTo(-length / 2, -width / 2);
-
-
+		water = new THREE.Water(
+			waterGeometry,
+			{
+				textureWidth: 852,
+				textureHeight: 480,
+				waterNormals: waterTexture,
+				alpha: 1.0,
+            	sunDirection: directionalLight.position.clone().normalize(),
+				sunColor: 0xffffff,
+				waterColor: 0x79cfe5,
+				distortionScale: 3.7,
+				fog: scene.fog !== undefined
+			}
+		);
+		water.rotation.x = -Math.PI / 2;
+		water.position.y = yTotalOffset;
+		water.position.z = zTotalOffset;
+		// water.position.y = -100;
+		// water.position.z = 100;
+		scene.add(water);
 
 		const dataScaleFactor = 6;
 		const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
@@ -676,33 +689,6 @@
 			wallBackObjects.push(wallBackObject);
 			scene.add(wallBackObject);
 		}
-
-
-		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
-		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
-			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-		});
-
-		water = new THREE.Water(
-			waterGeometry,
-			{
-				textureWidth: 852,
-				textureHeight: 480,
-				waterNormals: waterTexture,
-				alpha: 1.0,
-            	sunDirection: directionalLight.position.clone().normalize(),
-				sunColor: 0xffffff,
-				waterColor: 0x79cfe5,
-				distortionScale: 3.7,
-				fog: scene.fog !== undefined
-			}
-		);
-		water.rotation.x = -Math.PI / 2;
-		water.position.y = yTotalOffset;
-		water.position.z = zTotalOffset;
-		// water.position.y = -100;
-		// water.position.z = 100;
-		// scene.add(water);
 
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
