@@ -656,8 +656,8 @@
 			wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
 
 			wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-			wallFrontObject.position.y = (wallHeight / 2) * p;
-			wallFrontObject.position.z += zPosition;
+			wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallFrontObject.position.z += zTotalOffset + zPosition;
 			wallFrontObjects.push(wallFrontObject);
 			// scene.add(wallFrontObject);
 
@@ -667,8 +667,8 @@
 			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
 			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-			wallBackObject.position.y = (wallHeight / 2) * p;
-			wallBackObject.position.z -= zPosition;
+			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallBackObject.position.z -= zTotalOffset + zPosition;
 			wallBackObjects.push(wallBackObject);
 			// scene.add(wallBackObject);
 		}
