@@ -570,8 +570,8 @@
 		const dataScaleFactor = 3;
 		const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
 		const yOffset = 2;
-		const pebbleSpacing = 1.2;
-		const pebblePadding = 5;
+		const pebbleSpacing = 2.4;
+		const pebblePadding = 10;
 		const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
 		const riverWidth = 60 * pebbleSpacing + pebblePadding;
 		var stoneMaterials = new THREE.MeshToonMaterial({ color: 0x786f74 });
@@ -695,7 +695,7 @@
 		);
 		water.rotation.x = -Math.PI / 2;
 		water.position.y = -50;
-		water.position.z = -100;
+		water.position.z = -150;
 		// water.position.y = -100;
 		// water.position.z = 100;
 		scene.add(water);
