@@ -609,7 +609,7 @@
 				stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
 
 				stoneMeshes.push(stoneObject);
-				scene.add(stoneObject);
+				// scene.add(stoneObject);
 			}
 		});
 
@@ -655,7 +655,7 @@
 			wallFrontObject.position.y = (wallHeight / 2) * p;
 			wallFrontObject.position.z += zPosition;
 			wallFrontObjects.push(wallFrontObject);
-			scene.add(wallFrontObject);
+			// scene.add(wallFrontObject);
 
 			var wallBackObject = new THREE.Group();
 			var wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
@@ -666,7 +666,7 @@
 			wallBackObject.position.y = (wallHeight / 2) * p;
 			wallBackObject.position.z -= zPosition;
 			wallBackObjects.push(wallBackObject);
-			scene.add(wallBackObject);
+			// scene.add(wallBackObject);
 		}
 
 
