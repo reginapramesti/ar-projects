@@ -253,6 +253,9 @@
 	//		Initialise wildlife model
 	//////////////////////////////////////////////////////////////////////////////////
 	var wildlifeInit = function(scene) {
+
+		const yTotalOffset = -100;
+
 		var worldScale = 2;
 		var alpha = 0;
 		var beta = 0;
@@ -402,7 +405,7 @@
 					treeObject.rotation.y = Math.random() * Math.PI;
 					var noiseX = Math.random() * noise * 2 - noise;
 					var noiseZ = Math.random() * noise * 2 - noise;
-					treeObject.position.set(xPos + noiseX, 0, zPos + noiseZ);
+					treeObject.position.set(xPos + noiseX, yTotalOffset, zPos + noiseZ);
 					scene.add(treeObject);
 					treeGroups.push(treeObject);
 					// treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
@@ -424,7 +427,7 @@
 					kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
 					kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
 					kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
-					kangarooObject.position.set(kangarooXPos, 0, kangarooZPos);
+					kangarooObject.position.set(kangarooXPos, yTotalOffset, kangarooZPos);
 					scene.add(kangarooObject);
 				}
 				for (let b = 0; b < boneCount; b++) {
@@ -437,7 +440,7 @@
 					boneObject.add(createOutline(bone.geometry, outlineMaterial));
 					boneObject.rotation.y = Math.random() * 2 * Math.PI;
 					boneObject.scale.set(boneScale, boneScale, boneScale);
-					boneObject.position.set(boneXPos, 0, boneZPos);
+					boneObject.position.set(boneXPos, yTotalOffset, boneZPos);
 					scene.add(boneObject);
 				}
 			
