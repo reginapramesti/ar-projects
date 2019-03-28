@@ -86,7 +86,7 @@
 	scene.add( ambientLight );
 	
     let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    // directionalLight.position.set(0, ).normalize();
+    directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
 	// array of functions for the rendering loop
 	var onRenderFcts= [];
@@ -694,14 +694,16 @@
 			}
 		);
 		water.rotation.x = -Math.PI / 2;
+		water.position.y = 0;
+		water.position.z = 0;
 		// water.position.y = -100;
 		// water.position.z = 100;
 		scene.add(water);
 
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 100.0;
-			water.position.y -= 1;
-			water.position.z += 1;
+			// water.position.y -= 1;
+			water.position.z -= 0.1;
 		});
 	}
 	
