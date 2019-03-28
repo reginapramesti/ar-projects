@@ -693,6 +693,7 @@
 
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 20.0;
+			water.position.y -= 0.01;
 		});
 	}
 	
