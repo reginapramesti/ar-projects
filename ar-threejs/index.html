@@ -391,7 +391,7 @@
 			var kangaCount = Math.floor(rangeX / 3 / worldScale);
 			var boneCount = 0;
 
-			const treeSize = 5 * worldScale;
+			const treeSize = 8 * worldScale;
 			
 			while (xPos <= rangeX) {
 				zPos = -rangeZ;
@@ -400,7 +400,7 @@
 					let treeMesh = treeModels[treeIndex - 1].clone();
 					let treeObject = new THREE.Group();
 					treeObject.add(treeMesh);
-					treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
+					// treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
 					treeObject.scale.set(treeSize, treeSize, treeSize);
 					treeObject.rotation.y = Math.random() * Math.PI;
 					var noiseX = Math.random() * noise * 2 - noise;
@@ -424,7 +424,7 @@
 					let kangaroo = kangarooModel.clone();
 					let kangarooObject = new THREE.Group();
 					kangarooObject.add(kangaroo);
-					kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
+					// kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
 					kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
 					kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
 					kangarooObject.position.set(kangarooXPos, yTotalOffset, kangarooZPos);
@@ -437,7 +437,7 @@
 					let bone = boneModel.clone();
 					let boneObject = new THREE.Group();
 					boneObject.add(bone);
-					boneObject.add(createOutline(bone.geometry, outlineMaterial));
+					// boneObject.add(createOutline(bone.geometry, outlineMaterial));
 					boneObject.rotation.y = Math.random() * 2 * Math.PI;
 					boneObject.scale.set(boneScale, boneScale, boneScale);
 					boneObject.position.set(boneXPos, yTotalOffset, boneZPos);
