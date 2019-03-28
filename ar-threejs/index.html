@@ -409,8 +409,8 @@
 
 	var riverInit = function(scene) {
 		var xTotalOffset = 0;
-		var yTotalOffset = 0;
-		var zTotalOffset = 0;
+		var yTotalOffset = -50;
+		var zTotalOffset = -150;
 
 		var water;
 		var waterTexture;
@@ -694,8 +694,8 @@
 			}
 		);
 		water.rotation.x = -Math.PI / 2;
-		water.position.y = -25;
-		water.position.z = -200;
+		water.position.y = yTotalOffset;
+		water.position.z = zTotalOffset;
 		// water.position.y = -100;
 		// water.position.z = 100;
 		scene.add(water);
