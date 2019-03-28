@@ -567,7 +567,7 @@
 
 
 
-		const dataScaleFactor = 3;
+		const dataScaleFactor = 6;
 		const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
 		const yOffset = 2;
 		const pebbleSpacing = 2.4;
@@ -581,7 +581,7 @@
 		const bevelRadius = pebbleDepth / 2;
 		const rotationNoise = 0;//Math.PI / 3;
 
-		rcp60.forEach((rainfallValue, index) => {
+		rcp85.forEach((rainfallValue, index) => {
 
 			let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
 
@@ -607,8 +607,8 @@
 				stoneObject.add(createOutline(geometry, outlineMaterial));
 				stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
 
-				stoneObject.position.z += (zOffset - rainfallValue.year) * pebbleSpacing;
-				stoneObject.position.y = yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
+				stoneObject.position.z += zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
+				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
 				stoneObject.rotation.x = -Math.PI / 2;
 				stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
 
@@ -657,7 +657,8 @@
 
 			wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
 			wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallFrontObject.position.z += zTotalOffset + zPosition;
+			wallFrontObject.position.z = zPosition;
+			wallFrontObject.position.z += zTotalOffset;
 			wallFrontObjects.push(wallFrontObject);
 			scene.add(wallFrontObject);
 
@@ -668,7 +669,8 @@
 
 			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
 			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallBackObject.position.z -= zTotalOffset + zPosition;
+			wallBackObject.position.z = -zPosition;
+			wallBackObject.position.z += zTotalOffset;
 			wallBackObjects.push(wallBackObject);
 			scene.add(wallBackObject);
 		}
@@ -701,7 +703,7 @@
 		scene.add(water);
 
 		onRenderFcts.push(function() {
-			water.material.uniforms[ "time" ].value += 1.0 / 100.0;
+			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
 			// water.position.y -= 0.1;
 			// water.position.z -= 0.1;
 		});

@@ -3,6 +3,9 @@ var scene, camera, renderer, controls, stats;
 var water;
 var waterTexture;
 
+var yTotalOffset = -50;
+var zTotalOffset = -150;
+
 var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
 var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
 var rcp60 = [{ "year": 2040, "rainfall": -1.3998901 }, { "year": 2050, "rainfall": -2.1936162 }, { "year": 2060, "rainfall": -2.1142256 }, { "year": 2070, "rainfall": 2.386432 }, { "year": 2080, "rainfall": 10.35757 }, { "year": 2090, "rainfall": 5.697372 }];
@@ -190,7 +193,7 @@ function initialise() {
 
 
 
-    const dataScaleFactor = 3;
+    const dataScaleFactor = 6;
     const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
     const yOffset = 2;
     const pebbleSpacing = 1.2;
@@ -204,7 +207,7 @@ function initialise() {
     const bevelRadius = pebbleDepth / 2 + 0.1;
     const rotationNoise = 0;//Math.PI / 3;
 
-    rcp60.forEach((rainfallValue, index) => {
+    rcp85.forEach((rainfallValue, index) => {
 
         let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
         // let extrudeSettings = {
@@ -241,8 +244,8 @@ function initialise() {
             stoneObject.add(createOutline(geometry, outlineMaterial));
             stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
     
-            stoneObject.position.z += (zOffset - rainfallValue.year) * pebbleSpacing;
-            stoneObject.position.y = yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
+            stoneObject.position.z += zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
+            stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
             stoneObject.rotation.x = -Math.PI / 2;
             stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
     
@@ -290,8 +293,9 @@ function initialise() {
         wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
 
         wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        wallFrontObject.position.y = (wallHeight / 2) * p;
-        wallFrontObject.position.z += zPosition;
+        wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+        wallFrontObject.position.z = zPosition;
+        wallFrontObject.position.z += zTotalOffset;
         wallFrontObjects.push(wallFrontObject);
         scene.add(wallFrontObject);
         
@@ -301,8 +305,9 @@ function initialise() {
         wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
         wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        wallBackObject.position.y = (wallHeight / 2) * p;
-        wallBackObject.position.z -= zPosition;
+        wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+        wallBackObject.position.z = -zPosition;
+        wallBackObject.position.z += zTotalOffset;
         wallBackObjects.push(wallBackObject);
         scene.add(wallBackObject);
     }
@@ -332,6 +337,8 @@ function initialise() {
         }
     );
     water.rotation.x = -Math.PI / 2;
+    water.position.y = yTotalOffset;
+    water.position.z = zTotalOffset;
     scene.add(water);
 
     camera.position.z = 50;
