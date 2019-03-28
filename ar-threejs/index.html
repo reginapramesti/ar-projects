@@ -690,11 +690,12 @@
 			}
 		);
 		water.rotation.x = -Math.PI / 2;
-		water.position.y = -15;
+		water.position.y = -25;
+		water.position.z = 15;
 		scene.add(water);
 
 		onRenderFcts.push(function() {
-			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
+			water.material.uniforms[ "time" ].value += 1.0 / 100.0;
 		});
 	}
 	
