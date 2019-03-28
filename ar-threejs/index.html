@@ -27,7 +27,8 @@
 
 	<script src="js/OBJLoader.js"></script>
 	<script src="js/OrbitControls.js"></script>
-	<script src="js/model.js"></script>
+	<!-- <script src="js/river-model.js"></script> -->
+	<script src="js/wildlife-model.js"></script>
 </head>
 
 
@@ -395,14 +396,14 @@
 		// loadObject('obj/bone.obj', 0.01, 0xffffff);
 
 
-		treeGroups.forEach((treeGroup, index) => {
-			// treeGroup.rotation.y += 0.01;
-			treeGroup.position.set(treePositions[index].x, 0, treePositions[index].z);
-		});
-		objGroups.forEach(objGroup => {
-			// objGroup.rotation.y += 0.01;
-			objGroup.rotation.y = -Math.PI / 2;
-		})
+		// treeGroups.forEach((treeGroup, index) => {
+		// 	// treeGroup.rotation.y += 0.01;
+		// 	treeGroup.position.set(treePositions[index].x, 0, treePositions[index].z);
+		// });
+		// objGroups.forEach(objGroup => {
+		// 	// objGroup.rotation.y += 0.01;
+		// 	objGroup.rotation.y = -Math.PI / 2;
+		// })
 		
 		// add a torus knot	
 		// var geometry	= new THREE.CubeGeometry(1,1,1);
@@ -421,12 +422,12 @@
 		// mesh.position.y	= 0.5
 		// arWorldRoot.add( mesh );
 
-		// treeGroups.forEach(treeGroup => {
-		// 	arWorldRoot.add(treeGroup);
-		// });
-		// objGroups.forEach(object => {
-		// 	arWorldRoot.add(object);
-		// })
+		treeGroups.forEach(treeGroup => {
+			arWorldRoot.add(treeGroup);
+		});
+		objGroups.forEach(object => {
+			arWorldRoot.add(object);
+		})
 
 		onRenderFcts.push(updateTreesTransformation);
 		
