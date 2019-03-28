@@ -86,7 +86,7 @@
 	scene.add( ambientLight );
 	
     let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(1, 1, 1).normalize();
+    directionalLight.position.set(10, 10, 10).normalize();
     scene.add(directionalLight);
 	// array of functions for the rendering loop
 	var onRenderFcts= [];
@@ -694,8 +694,8 @@
 			}
 		);
 		water.rotation.x = -Math.PI / 2;
-		water.position.y = -50;
-		water.position.z = -20;
+		water.position.y = -100;
+		water.position.z = -100;
 		scene.add(water);
 
 		onRenderFcts.push(function() {
