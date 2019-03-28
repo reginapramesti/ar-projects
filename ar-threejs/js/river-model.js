@@ -337,6 +337,9 @@ function initialise() {
     // camera.position.z = 50;
 }
 
+var addObjectsToScene = function(scene) {
+    
+}
 
 function updateWaterUniforms() {
     water.material.uniforms[ "time" ].value += 1.0 / 20.0;

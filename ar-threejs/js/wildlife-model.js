@@ -179,6 +179,14 @@ function updateTreesTransformation() {
     });
 }
 
+var addObjectsToScene = function(scene) {
+    console.log(objGroups);
+    console.log(objGroups.length);
+    objGroups.forEach(object => {
+        scene.add(object);
+    })
+}
+
 // function render() {
 //     treeGroups.forEach((treeGroup, index) => {
 //         // treeGroup.rotation.y += 0.01;
