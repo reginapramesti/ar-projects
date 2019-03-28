@@ -659,7 +659,7 @@
 			wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
 			wallFrontObject.position.z += zTotalOffset + zPosition;
 			wallFrontObjects.push(wallFrontObject);
-			// scene.add(wallFrontObject);
+			scene.add(wallFrontObject);
 
 			var wallBackObject = new THREE.Group();
 			var wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
@@ -670,7 +670,7 @@
 			wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
 			wallBackObject.position.z -= zTotalOffset + zPosition;
 			wallBackObjects.push(wallBackObject);
-			// scene.add(wallBackObject);
+			scene.add(wallBackObject);
 		}
 
 
