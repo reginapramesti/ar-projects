@@ -103,41 +103,92 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 		console.log(absoluteBaseURL);
 		// pattern hiro/kanji/a/b/c/f
 		var markersControlsParameters = [
+			// Default markers
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-hiro.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-arjs.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-kanji.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterA.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterB.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterC.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterF.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterD.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterG.patt',
+			// },
+
+			// Custom markers
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-hiro.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/A.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-arjs.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/B.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-kanji.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/C.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterA.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/D.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterB.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/E.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterC.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/F.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterF.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/G.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterD.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/H.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterG.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/I.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + '/pattern-files/J.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + '/pattern-files/K.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + '/pattern-files/L.patt',
 			},
 		]		
 	}else if( trackingBackend === 'aruco' ){
