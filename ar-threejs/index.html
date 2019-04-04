@@ -490,7 +490,7 @@
 	const pebbleSpacing = 2.6;
 	const pebblePadding = 0;
 	const riverWidth = 60 * pebbleSpacing + pebblePadding;
-	var xTotalOffset = 0;
+	var xTotalOffset = -50;
 	var yTotalOffset = -50;
 	var zTotalOffset = -150;
 
@@ -661,6 +661,7 @@
 
 				stoneObject.position.z = zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
 				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2) * pebbleIx);
+				stoneObject.position.x = xTotalOffset;
 				stoneObject.rotation.x = -Math.PI / 2;
 				// stoneObject.rotation.y = Math.PI; // seems to be rotated 180 degrees?
 				stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
