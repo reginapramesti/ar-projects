@@ -491,8 +491,8 @@
 	const pebblePadding = 0;
 	const riverWidth = 60 * pebbleSpacing + pebblePadding;
 	var xTotalOffset = -50;
-	var yTotalOffset = -50;
-	var zTotalOffset = -150;
+	var yTotalOffset = 0;
+	var zTotalOffset = 0;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise river model
@@ -816,7 +816,7 @@
 		// mesh.position.y	= 0.5
 		// arWorldRoot.add( mesh );
 		// wildlifeInit(arWorldRoot);
-		wallsStonesInit(arWorldRoot);
+		// wallsStonesInit(arWorldRoot);
 		riverInit(arWorldRoot);
 		console.log(arWorldRoot);
 	})()
