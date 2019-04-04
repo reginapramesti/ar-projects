@@ -36,12 +36,12 @@
 	<style>
 		#narrativeText {
 			font-family: 'Courgette', cursive;
-			font-size: 3em;
+			font-size: 5em;
 			text-align: center;
 			position: absolute; 
 			top: 0; 
 			left: 0; 
-			height: 96%; 
+			height: 96%;
 			width: 96%;
 			display: table;
 			z-index: 1;
@@ -61,7 +61,7 @@
 	by <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
 	</div>
 	<div id="narrativeText">
-		<p id="text">Thank you and welcome to Regina's AR demo! First and foremost let me take you back in time</p>
+		<p id="text">If this keeps happening...</p>
 	</div>
 	<!-- info at the top of page -->
 	<div style='position: fixed; bottom: 10px; width:100%; text-align: center;z-index:1';>
@@ -81,12 +81,26 @@
 		</style>
 		<img id='recordButton' src="images/rightarrow.png" width='64px'  height='64px'>
 	</div>
+	
+	<div style='position: fixed; bottom: 16px; left: 16px; z-index:1';>
+			<style>
+				#flowerButton {
+					visibility: hidden;
+				}
+				#flowerButton:hover {
+					cursor: pointer;
+				}
+			</style>
+		<img id='flowerButton' src="images/flower.png" width='64px'  height='64px'>
+	</div>
 
 	<!-- ----------------------------------------------------------- -->
 <script>
 ;(function(){
 	var markersLearned = false;
 	var clickCounter = 0;
+
+	var arWorldRoot = new THREE.Group()
 
 	// Global Object Variables
 	var treeGroups = [];
@@ -123,8 +137,45 @@
 
 	onRenderFcts.push(function() {
 		if (markersLearned) {
-			scene.background = null;
-			document.getElementById("text").innerHTML="";
+			if (clickCounter == 0) {
+				scene.background = null;
+				document.getElementById("text").innerHTML="";
+				// load the timeline
+			} else if (clickCounter == 1) {
+				// clearScene(arWorldRoot);
+				scene.background = new THREE.Color(0xffffff);
+				document.getElementById("text").innerHTML="Can we even use those stepping stones anymore?";
+			} else if (clickCounter == 2) {
+				scene.background = null;
+				document.getElementById("text").innerHTML="";
+				//load stepping stones
+				// riverInit(arWorldRoot);
+				// stonesInit(arWorldRoot);
+			} else if (clickCounter == 3) {
+				// clearScene(arWorldRoot);
+				scene.background = new THREE.Color(0xffffff);
+				document.getElementById("text").innerHTML="Is there something we can do?";
+			} else if (clickCounter == 4) {
+				scene.background = null;
+				document.getElementById("text").innerHTML="";
+				document.getElementById("flowerButton").style.visibility='visible';
+				// riverInit(arWorldRoot);
+				// stonesInit(arWorldRoot);
+			} else if (clickCounter == 5) {
+				scene.background = null;
+				document.getElementById("text").innerHTML="";
+				// clearScene(arWorldRoot);
+				// wallsInit(arWorldRoot);
+				// riverInit(arWorldRoot);
+				// load the walls scene
+				document.getElementById("recordButton").src="images/closebook.png";
+				document.getElementById("flowerButton").style.visibility='hidden';
+			} else {
+				// clearScene(arWorldRoot);
+				scene.background = new THREE.Color(0xffffff);
+				document.getElementById("text").innerHTML="Thank you! I hope you enjoyed it!";
+				document.getElementById("recordButton").style.visibility='hidden';
+			}
 		} else {
 			scene.background = new THREE.Color(0xffffff);
 		}
@@ -138,6 +189,8 @@
 	if( hasHash === true ){
 		var urlOptions = JSON.parse(decodeURIComponent(location.hash.substring(1)))
 		markersLearned = (urlOptions.markersLearned !== undefined);
+		console.log("markersLearned");
+		console.log(markersLearned);
 	}else{
 		var urlOptions = {
 			trackingBackend: 'artoolkit',
@@ -147,6 +200,9 @@
 	urlOptionsUpdate()
 	function urlOptionsUpdate(){
 		location.hash = '#'+encodeURIComponent(JSON.stringify(urlOptions))
+	}
+	if (!markersLearned) {
+		document.getElementById("recordButton").src="images/search.png";
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -266,21 +322,54 @@
 	//////////////////////////////////////////////////////////////////////////////
 	//		init UI
 	//////////////////////////////////////////////////////////////////////////////
+	var flowerCounter = 0;
+	document.querySelector('#flowerButton').addEventListener('click', function() {
+		flowerCounter++;
+		if (flowerCounter == 2) {
+			clearScene(arWorldRoot);
+			dataSource = rcp60;
+			riverInit(arWorldRoot);
+			stonesInit(arWorldRoot);
+		} else if (flowerCounter == 4) {
+			clearScene(arWorldRoot);
+			dataSource = rcp45;
+			riverInit(arWorldRoot);
+			stonesInit(arWorldRoot);
+		} else if (flowerCounter == 6) {
+			clearScene(arWorldRoot);
+			dataSource = rcp26;
+			riverInit(arWorldRoot);
+			stonesInit(arWorldRoot);
+		}
+	})
 
 	document.querySelector('#recordButton').addEventListener('click', function(){
 		urlOptionsUpdate()
 
 		if (!markersLearned) {
-			if (clickCounter == 0) {
-				document.getElementById("text").innerHTML = "Let's try to familiarise ourselves with the layout of the area first"
-				document.getElementById("recordButton").src="images/search.png";
-				clickCounter++;
-			} else {
-				THREEx.ArMultiMarkerUtils.navigateToLearnerPage('learner.html', urlOptions.trackingBackend)
-			}
+			THREEx.ArMultiMarkerUtils.navigateToLearnerPage('learner.html', urlOptions.trackingBackend)
 		} else {
-			// Open up the other visuals
-			location.href = 'river.html';
+			console.log(clickCounter);
+			clickCounter++;
+			if (clickCounter == 0) {
+				// load the timeline
+			} else if (clickCounter == 1) {
+				clearScene(arWorldRoot);
+			} else if (clickCounter == 2) {
+				riverInit(arWorldRoot);
+				stonesInit(arWorldRoot);
+			} else if (clickCounter == 3) {
+				clearScene(arWorldRoot);
+			} else if (clickCounter == 4) {
+				riverInit(arWorldRoot);
+				stonesInit(arWorldRoot);
+			} else if (clickCounter == 5) {
+				clearScene(arWorldRoot);
+				wallsInit(arWorldRoot);
+				riverInit(arWorldRoot);
+			} else {
+				clearScene(arWorldRoot);
+			}
 		}
 	})
 	
@@ -301,7 +390,7 @@
 	}
 	window.trackingBackendSet = trackingBackendSet
 
-	// Function shared by all three models
+	// Function/global variables shared by all three models
 	
 	var createOutline = function (geometry, material) {
 		const outlineScale = 1.03;
@@ -325,217 +414,6 @@
 		shader.vertexShader =
 			shader.vertexShader.replace(token, customTransform)
 	};
-	
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Initialise wildlife model
-	//////////////////////////////////////////////////////////////////////////////////
-	var wildlifeInit = function(scene) {
-
-		// Setup the sound files
-		var forestSE = new Audio("audio/rainforestambience.mp3");
-		forestSE.loop = true;
-		
-		var listener = new THREE.AudioListener();
-		var audio = new THREE.Audio(listener);
-		audio.setMediaElementSource(forestSE);
-
-		forestSE.play();
-
-		const yTotalOffset = -20;
-
-		var worldScale = 2;
-		var alpha = 0;
-		var beta = 0;
-		var diffuseColor = new THREE.Color(0xcd6237);
-		var specularShininess = Math.pow(2, alpha * 10);
-		var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
-
-		var loader = new THREE.OBJLoader();
-		var outlineMaterial = new THREE.MeshLambertMaterial({
-			color: 'black',
-			side: THREE.BackSide
-		});
-		outlineMaterial.onBeforeCompile = (shader) => {
-			const token = `#include <begin_vertex>`
-			const customTransform = `
-				vec3 transformed = position + objectNormal*0.02;
-			`
-			shader.vertexShader =
-				shader.vertexShader.replace(token, customTransform)
-		};
-
-		var treeGroups = [];
-		var treeModels = [];
-		var objGroups = [];
-		var treePositions = [];
-
-		var treeOutlineMaterial = new THREE.MeshLambertMaterial({
-			color: 'black',
-			side: THREE.BackSide
-		});
-
-		var treeMaterials = [
-			new THREE.MeshToonMaterial({
-				color: new THREE.Color(0x3b802f),
-				specular: specularColor,
-				reflectivity: beta,
-				shininess: specularShininess,
-				side: THREE.FrontSide
-			}),
-			new THREE.MeshToonMaterial({
-				color: new THREE.Color(0xa67344),
-				specular: specularColor,
-				reflectivity: beta,
-				shininess: specularShininess,
-				side: THREE.FrontSide
-			})
-		];
-
-		var objectsLoaded = 0;
-		var kangarooModel;
-		var boneModel;
-
-		// var createOutline = function (geometry, material) {
-		// 	const outlineScale = 1.03;
-		// 	var objOutline = new THREE.Mesh(geometry, material);
-		// 	objOutline.scale.set(outlineScale, outlineScale, outlineScale);
-		// 	return objOutline;
-		// }
-
-		var onTreesLoaded = function (treeObject) {
-			wait = false;
-			var treeGroup = new THREE.Group();
-
-			treeObject.children[0].material = treeMaterials;
-			// treeGroup.add(treeObject);
-			// treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
-			treeModels.push(treeObject.children[0]); 
-			objectsLoaded++;
-
-			console.log("treeModels in onTreesLoaded");
-			console.log(treeModels);
-			if (objectsLoaded == 7)
-				populateForest();
-		};
-
-		var onObjectLoading = function (xhr) {
-			console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-		}
-
-		var onObjectLoadError = function (error) {
-			console.log('An error has happened');
-		}
-
-		var loadObject = function (path, scale, diffuseColor, model) {
-			loader.load(
-				path,
-				function (object) {
-
-					object.children[0].material = new THREE.MeshToonMaterial({
-						color: diffuseColor,
-						specular: specularColor,
-						reflectivity: beta,
-						shininess: specularShininess,
-						side: THREE.FrontSide
-					});
-					if (model == 0) {
-						kangarooModel = object.children[0];
-					} else if (model == 1) {
-						boneModel = object.children[0];
-					}
-					objectsLoaded++;
-
-					if (objectsLoaded == 7)
-						populateForest();
-				},
-				onObjectLoading,
-				onObjectLoadError
-			)
-		}
-
-		for (let treeIndex = 1; treeIndex <= 5; treeIndex++) {
-			loader.load(
-				'obj/Tree' + treeIndex + '/tree.obj',
-				onTreesLoaded,
-				onObjectLoading,
-				onObjectLoadError
-			);
-		}
-		loadObject('obj/Kangaroo.obj', 0.2 * worldScale, diffuseColor, 0);
-		loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
-
-		// tree trunk: #a67344
-		// tree leaves: #3b802f
-
-		var populateForest = function() {
-			var spacing = 8 * worldScale; 
-			var spacingDelta = 0.05 * worldScale;
-			var noise = 2 * worldScale;
-			const rangeX = 50 * worldScale;
-			const rangeZ = 20 * worldScale;
-			var xPos = -rangeX;
-			var zPos = -rangeZ;
-			var kangaCount = Math.floor(rangeX / 3 / worldScale);
-			var boneCount = 0;
-
-			const treeSize = 8 * worldScale;
-			
-			while (xPos <= rangeX) {
-				zPos = -rangeZ;
-				while (zPos <= rangeZ) {
-					let treeIndex = Math.floor(Math.random() * 5 + 1);
-					let treeMesh = treeModels[treeIndex - 1].clone();
-					let treeObject = new THREE.Group();
-					treeObject.add(treeMesh);
-					// treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
-					treeObject.scale.set(treeSize, treeSize, treeSize);
-					treeObject.rotation.y = Math.random() * Math.PI;
-					var noiseX = Math.random() * noise * 2 - noise;
-					var noiseZ = Math.random() * noise * 2 - noise;
-					treeObject.position.set(xPos + noiseX, yTotalOffset, zPos + noiseZ);
-					scene.add(treeObject);
-					treeGroups.push(treeObject);
-					// treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
-			
-					spacing += spacingDelta;
-					zPos += spacing;
-				}
-				spacingDelta += spacingDelta;
-				noise += spacingDelta;
-				xPos += spacing;
-			
-				for (let k = 0; k < kangaCount; k++) {
-					const kangaScale = 0.2 * worldScale;
-					let kangarooXPos = xPos + Math.random() * noise * 6 - noise;
-					let kangarooZPos = Math.random() * rangeZ * 2 - rangeZ;
-					let kangaroo = kangarooModel.clone();
-					let kangarooObject = new THREE.Group();
-					kangarooObject.add(kangaroo);
-					// kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
-					kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
-					kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
-					kangarooObject.position.set(kangarooXPos, yTotalOffset, kangarooZPos);
-					scene.add(kangarooObject);
-				}
-				for (let b = 0; b < boneCount; b++) {
-					const boneScale = 0.008 * worldScale;
-					let boneXPos = xPos + Math.random() * noise * 6 - noise;
-					let boneZPos = Math.random() * rangeZ * 2 - rangeZ;
-					let bone = boneModel.clone();
-					let boneObject = new THREE.Group();
-					boneObject.add(bone);
-					// boneObject.add(createOutline(bone.geometry, outlineMaterial));
-					boneObject.rotation.y = Math.random() * 2 * Math.PI;
-					boneObject.scale.set(boneScale, boneScale, boneScale);
-					boneObject.position.set(boneXPos, yTotalOffset, boneZPos);
-					scene.add(boneObject);
-				}
-			
-				kangaCount -= 2 * worldScale;
-				boneCount += 0.5 * worldScale;
-			}
-		}
-	}
 
 	const pebbleSpacing = 2.6;
 	const pebblePadding = 0;
@@ -543,23 +421,45 @@
 	var xTotalOffset = -50;
 	var yTotalOffset = -250;
 	var zTotalOffset = -300;
+	
+	var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
+	var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
+	var rcp60 = [{ "year": 2040, "rainfall": -1.3998901 }, { "year": 2050, "rainfall": -2.1936162 }, { "year": 2060, "rainfall": -2.1142256 }, { "year": 2070, "rainfall": 2.386432 }, { "year": 2080, "rainfall": 10.35757 }, { "year": 2090, "rainfall": 5.697372 }];
+	var rcp85 = [{ "year": 2040, "rainfall": 0.91791856 }, { "year": 2050, "rainfall": 1.6345977 }, { "year": 2060, "rainfall": 0.35585436 }, { "year": 2070, "rainfall": 2.4581237 }, { "year": 2080, "rainfall": 7.7386603 }, { "year": 2090, "rainfall": 5.343646 }];
+	var dataSource = rcp85;
+
+	var stoneMeshes = [];
+	var wallFrontObjects = [];
+	var wallBackObjects = [];
+
+	const baseLevel = 15;
+	
+	const dataScaleFactor = 6;
+	const zOffset = 2070; // so they will be positioned at 25, 15, 5, -5, -15, -25
+	const yOffset = 10;
+	const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
+	var stoneMaterials = new THREE.MeshToonMaterial({
+		color: 0x786f74,
+	});
+	const stoneScale = 0.7;
+	const pebbleDepth = 8;
+	const bevelRadius = pebbleDepth / 2 + 0.1;
+	const rotationNoise = 0;//Math.PI / 3;
+
+	const partitions = 7;
+	const totalWallLength = 490;
+	const wallLength = totalWallLength / partitions; // 80 each section
+	const wallDepth = 3;
+	const xRepeat = 15 / partitions;
+	const yRepeat = 0.3 / partitions;
+	const zPosition = (riverWidth / 2) + (wallDepth / 2); // space between wall and river just because
+	var wallHeight = baseLevel * 2;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise river model
 	//////////////////////////////////////////////////////////////////////////////////
 
-	var wallsStonesInit = function(scene) {
-
-		var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
-		var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
-		var rcp60 = [{ "year": 2040, "rainfall": -1.3998901 }, { "year": 2050, "rainfall": -2.1936162 }, { "year": 2060, "rainfall": -2.1142256 }, { "year": 2070, "rainfall": 2.386432 }, { "year": 2080, "rainfall": 10.35757 }, { "year": 2090, "rainfall": 5.697372 }];
-		var rcp85 = [{ "year": 2040, "rainfall": 0.91791856 }, { "year": 2050, "rainfall": 1.6345977 }, { "year": 2060, "rainfall": 0.35585436 }, { "year": 2070, "rainfall": 2.4581237 }, { "year": 2080, "rainfall": 7.7386603 }, { "year": 2090, "rainfall": 5.343646 }];
-
-		var stoneMeshes = [];
-		var wallFrontObjects = [];
-		var wallBackObjects = [];
-
-		const baseLevel = 15;
+	var stonesInit = function(scene) {
 
 		function createShapes() {
 
@@ -652,6 +552,8 @@
 			
 			return shapes;
 		}
+		
+		var shapes = createShapes();
 
 		// Inspired by https://discourse.threejs.org/t/round-edged-box/1402
 		function createRoundedPebblesGeometry( shape, depth, radius0, smoothness ) {
@@ -670,20 +572,7 @@
 			return geometry;
 		}
 
-		const dataScaleFactor = 6;
-		const zOffset = 2070; // so they will be positioned at 25, 15, 5, -5, -15, -25
-		const yOffset = 10;
-		const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
-		var stoneMaterials = new THREE.MeshToonMaterial({ 
-			color: 0x786f74,
-		 });
-		var shapes = createShapes();
-		const stoneScale = 0.7;
-		const pebbleDepth = 8;
-		const bevelRadius = pebbleDepth / 2 + 0.1;
-		const rotationNoise = 0;//Math.PI / 3;
-
-		rcp85.forEach((rainfallValue, index) => {
+		dataSource.forEach((rainfallValue, index) => {
 
 			let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
 
@@ -721,15 +610,9 @@
 			}
 		});
 
-		const partitions = 7;
-		const totalWallLength = 490;
-		const wallLength = totalWallLength / partitions; // 80 each section
-		const wallDepth = 3;
-		const xRepeat = 15 / partitions;
-		const yRepeat = 0.3 / partitions;
-		const zPosition = (riverWidth / 2) + (wallDepth / 2) + 7; // space between wall and river just because
-		var wallHeight = baseLevel / partitions;
+	}
 
+	var wallsInit = function(scene) {
 		var wallTextureXZ = new THREE.TextureLoader().load("images/brickWall.jpg");
 		var wallTextureYZ = new THREE.TextureLoader().load("images/brickWall.jpg");
 		wallTextureXZ.wrapS = wallTextureXZ.wrapT = THREE.RepeatWrapping;
@@ -785,7 +668,6 @@
 			wallBackObject.position.z += zTotalOffset;
 			scene.add(wallBackObject);
 		}
-
 	}
 
 	var riverInit = function(scene) {
@@ -835,8 +717,18 @@
 	//		Add simple object on smoothedRoot
 	//////////////////////////////////////////////////////////////////////////////////
 
+	var clearScene = function(scene) {
+		while(scene.children.length > 0) {
+			clearScene(scene.children[0]);
+			scene.remove(scene.children[0]);
+		}
+
+		if (scene.geometry) scene.geometry.dispose();
+		// if (scene.material) scene.material.dispose();
+		if (scene.texture) scene.texture.dispose();
+	}   
+
 	;(function(){
-		var arWorldRoot = new THREE.Group()
 		var averageMatrix = THREEx.ArMultiMarkerControls.computeCenter(multiMarkerFile)
 		averageMatrix.decompose(arWorldRoot.position, arWorldRoot.quaternion, arWorldRoot.scale)		
 		smoothedRoot.add(arWorldRoot)
@@ -867,8 +759,8 @@
 		// arWorldRoot.add( mesh );
 		// wildlifeInit(arWorldRoot);
 		// wallsStonesInit(arWorldRoot);
-		if (markersLearned)
-			wildlifeInit(arWorldRoot);
+		// riverInit(arWorldRoot);
+		// console.log(arWorldRoot);
 	})()
 
 	//////////////////////////////////////////////////////////////////////////////////

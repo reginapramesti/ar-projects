@@ -27,8 +27,7 @@
 </style>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1';>
-	<a href='https://github.com/jeromeetienne/AR.js/' target='_blank'>AR.js</a> - Multi marker
-	by <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
+	<p>Please have a look around the area to scan some markers!</p>
 	<br/>
 	Status:
 	<span id='appStatus' style='font-weight: bolder;'>stopped</span>
@@ -39,8 +38,8 @@
 	<a href='javascript:void(0)' onclick='onRecordClear()'>Clear File</a>
 </div>
 <div style='position: fixed; bottom: 16px; right: 16px; z-index:2';>
-	<img id='recordStartButton' src="images/record-start.png" width='64px'  height='64px' onclick='onRecordStart()'>
-	<img id='recordStopButton' src="images/record-stop.png" width='64px'  height='64px' onclick='onRecordStop()' style='display: none;'>
+	<img id='recordStartButton' src="images/rightarrow.png" width='64px'  height='64px' onclick='onRecordStart()'>
+	<img id='recordStopButton' src="images/rightarrow.png" width='64px'  height='64px' onclick='onRecordStop()' style='display: none;'>
 </div>
 <div style='position: fixed; bottom: 16px; left: 16px; z-index:2' id='markersStatus';>
 	<div>
@@ -84,11 +83,18 @@
 	}else{
 		var urlOptions = {
 			backURL : null,
-			trackingBackend: 'artookit',
+			trackingBackend: 'artoolkit',
 			markerControlsParameters : [],
 		}
 		alert('no urlOption - should not happen')
 	}
+	
+	var newURLOptions = {
+		trackingBackend: urlOptions.trackingBackend,
+		markersLearned: true,
+	}
+
+	urlOptions.backURL = urlOptions.backURL.split('#')[0] + '#' + JSON.stringify(newURLOptions);
 	
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +227,7 @@
 	//////////////////////////////////////////////////////////////////////////////
 	
 	function onRecordStart(){
+		console.log(urlOptions.backURL);
 		// cant be started, if it is already started
 		if( multiMarkerLearning.enabled === true ){
 			console.log('already started')
