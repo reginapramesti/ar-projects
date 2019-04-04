@@ -165,7 +165,10 @@
 
 	// prepare the parameters
 	var subMarkersControls = []
-	urlOptions.markersControlsParameters.forEach(function(markerControlsParameters){
+	console.log(urlOptions.markersControlsParameters);
+	var customMultiMarkersControlsParameters = THREEx.ArMultiMarkerUtils.createDefaultMarkersControlsParameters(urlOptions.trackingBackend);
+	console.log(THREEx.ArMultiMarkerUtils.createDefaultMarkersControlsParameters(urlOptions.trackingBackend));
+	customMultiMarkersControlsParameters.forEach(function(markerControlsParameters){
 		// create a markerRoot
 		var markerRoot = new THREE.Group()
 		scene.add(markerRoot)

@@ -99,13 +99,17 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 	link.href = ARjs.Context.baseURL
 	var absoluteBaseURL = link.href
 
-
 	if( trackingBackend === 'artoolkit' ){
+		console.log(absoluteBaseURL);
 		// pattern hiro/kanji/a/b/c/f
 		var markersControlsParameters = [
 			{
 				type : 'pattern',
 				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-hiro.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-arjs.patt',
 			},
 			{
 				type : 'pattern',
@@ -126,6 +130,14 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 			{
 				type : 'pattern',
 				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterF.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterD.patt',
+			},
+			{
+				type : 'pattern',
+				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterG.patt',
 			},
 		]		
 	}else if( trackingBackend === 'aruco' ){
