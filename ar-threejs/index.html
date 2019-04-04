@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<title>Hello, world!</title>
+	<title>Regina's AR Storytelling and Data Visualisation</title>
 	
 	<!-- include three.js library -->
 	<script src='three.js/three.js'></script>
@@ -73,6 +73,8 @@
 	var renderer	= new THREE.WebGLRenderer({
 		alpha: true
 	});
+	// Make the screen non-transparent so it doesn't show the webcam aspect.
+	// var renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute'
@@ -85,7 +87,7 @@
 	let ambientLight = new THREE.AmbientLight( 0xcccccc );
 	scene.add( ambientLight );
 	
-    let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
 	// array of functions for the rendering loop
@@ -248,6 +250,31 @@
 		location.reload()
 	}
 	window.trackingBackendSet = trackingBackendSet
+
+	// Function shared by all three models
+	
+	var createOutline = function (geometry, material) {
+		const outlineScale = 1.03;
+		var objOutline = new THREE.Mesh(geometry, material);
+		objOutline.scale.set(outlineScale, outlineScale, outlineScale);
+		return objOutline;
+	}
+	var outlineMaterial = new THREE.MeshLambertMaterial({
+		color: 'black',
+		side: THREE.BackSide,
+	});
+	outlineMaterial.polygonOffset = true;
+	outlineMaterial.depthTest = true;
+	outlineMaterial.polygonOffsetFactor = 1000;
+	outlineMaterial.polygonOffsetUnits = 2;
+	outlineMaterial.onBeforeCompile = (shader) => {
+		const token = `#include <begin_vertex>`
+		const customTransform = `
+				vec3 transformed = position + objectNormal*0.02;
+			`
+		shader.vertexShader =
+			shader.vertexShader.replace(token, customTransform)
+	};
 	
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise wildlife model
@@ -318,12 +345,12 @@
 		var kangarooModel;
 		var boneModel;
 
-		var createOutline = function (geometry, material) {
-			const outlineScale = 1.03;
-			var objOutline = new THREE.Mesh(geometry, material);
-			objOutline.scale.set(outlineScale, outlineScale, outlineScale);
-			return objOutline;
-		}
+		// var createOutline = function (geometry, material) {
+		// 	const outlineScale = 1.03;
+		// 	var objOutline = new THREE.Mesh(geometry, material);
+		// 	objOutline.scale.set(outlineScale, outlineScale, outlineScale);
+		// 	return objOutline;
+		// }
 
 		var onTreesLoaded = function (treeObject) {
 			wait = false;
@@ -460,17 +487,18 @@
 		}
 	}
 
+	const pebbleSpacing = 2.6;
+	const pebblePadding = 0;
+	const riverWidth = 60 * pebbleSpacing + pebblePadding;
+	var xTotalOffset = 0;
+	var yTotalOffset = -50;
+	var zTotalOffset = -150;
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise river model
 	//////////////////////////////////////////////////////////////////////////////////
 
-	var riverInit = function(scene) {
-		var xTotalOffset = 0;
-		var yTotalOffset = -50;
-		var zTotalOffset = -150;
-
-		var water;
-		var waterTexture;
+	var wallsStonesInit = function(scene) {
 
 		var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
 		var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
@@ -482,25 +510,6 @@
 		var wallBackObjects = [];
 
 		const baseLevel = 15;
-
-		var createOutline = function (geometry, material) {
-			const outlineScale = 1.03;
-			var objOutline = new THREE.Mesh(geometry, material);
-			objOutline.scale.set(outlineScale, outlineScale, outlineScale);
-			return objOutline;
-		}
-		var outlineMaterial = new THREE.MeshLambertMaterial({
-			color: 'black',
-			side: THREE.BackSide
-		});
-		outlineMaterial.onBeforeCompile = (shader) => {
-			const token = `#include <begin_vertex>`
-			const customTransform = `
-				vec3 transformed = position + objectNormal*0.02;
-			`
-			shader.vertexShader =
-				shader.vertexShader.replace(token, customTransform)
-		};
 
 		function createShapes() {
 
@@ -612,17 +621,16 @@
 		}
 
 		const dataScaleFactor = 6;
-		const zOffset = 2065; // so they will be positioned at 25, 15, 5, -5, -15, -25
-		const yOffset = 2;
-		const pebbleSpacing = 2.4;
-		const pebblePadding = 10;
+		const zOffset = 2070; // so they will be positioned at 25, 15, 5, -5, -15, -25
+		const yOffset = 10;
 		const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
-		const riverWidth = 60 * pebbleSpacing + pebblePadding;
-		var stoneMaterials = new THREE.MeshToonMaterial({ color: 0x786f74 });
+		var stoneMaterials = new THREE.MeshToonMaterial({ 
+			color: 0x786f74,
+		 });
 		var shapes = createShapes();
 		const stoneScale = 0.7;
 		const pebbleDepth = 8;
-		const bevelRadius = pebbleDepth / 2;
+		const bevelRadius = pebbleDepth / 2 + 0.1;
 		const rotationNoise = 0;//Math.PI / 3;
 
 		rcp85.forEach((rainfallValue, index) => {
@@ -652,7 +660,7 @@
 				stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
 
 				stoneObject.position.z = zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
-				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2 - 1) * pebbleIx);
+				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2) * pebbleIx);
 				stoneObject.rotation.x = -Math.PI / 2;
 				// stoneObject.rotation.y = Math.PI; // seems to be rotated 180 degrees?
 				stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
@@ -661,10 +669,88 @@
 				scene.add(stoneObject);
 			}
 		});
+
+		const partitions = 7;
+		const totalWallLength = 490;
+		const wallLength = totalWallLength / partitions; // 80 each section
+		const wallDepth = 3;
+		const xRepeat = 15 / partitions;
+		const yRepeat = 0.3 / partitions;
+		const zPosition = (riverWidth / 2) + (wallDepth / 2) + 7; // space between wall and river just because
+		var wallHeight = baseLevel / partitions;
+
+		var wallTextureXZ = new THREE.TextureLoader().load("images/brickWall.jpg");
+		var wallTextureYZ = new THREE.TextureLoader().load("images/brickWall.jpg");
+		wallTextureXZ.wrapS = wallTextureXZ.wrapT = THREE.RepeatWrapping;
+		wallTextureYZ.wrapS = wallTextureYZ.wrapT = THREE.RepeatWrapping;
+
+		wallTextureXZ.repeat.set(xRepeat, yRepeat * (wallDepth / wallHeight));
+		wallTextureYZ.repeat.set(yRepeat * (wallDepth / wallHeight), yRepeat);
+
+		for (var p = 0; p < partitions; p++) {
+			// var p = 4;
+			let wallGeometry = new THREE.BoxBufferGeometry(wallLength, wallHeight * (p + 1), wallDepth);
+
+			let wallTextureXY = new THREE.TextureLoader().load("images/brickWall.jpg");
+			wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
+			wallTextureXY.repeat.set(xRepeat, yRepeat * (p + 1));
+
+			let wallMaterials = [
+				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // left
+				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // right
+				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // top
+				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // bottom
+				new THREE.MeshToonMaterial({ map: wallTextureXY }), // front
+				new THREE.MeshToonMaterial({ map: wallTextureXY }), // back
+			]
+
+			let wallFrontObject = new THREE.Group();
+			let wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
+			wallFrontObject.add(wallFront);
+			wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
+
+			wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        	wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallFrontObject.position.z = zPosition;
+			wallFrontObject.position.z += zTotalOffset;
+
+			// (partitions - p) because the entire wall seems to be rotated by 180 degrees.
+			// wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        	// wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			// wallFrontObject.position.z = zPosition;
+			// wallFrontObject.position.z += zTotalOffset;
+			wallFrontObjects.push(wallFrontObject);
+			scene.add(wallFrontObject);
+
+			
+			let wallBackObject = new THREE.Group();
+			let wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
+			wallBackObject.add(wallBack);
+			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
+
+			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        	wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			wallBackObject.position.z = -zPosition;
+			wallBackObject.position.z += zTotalOffset;
+			scene.add(wallBackObject);
+		}
+
+	}
+
+	var riverInit = function(scene) {
+
+		var water;
+		var waterTexture;
+
 		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
 		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
 			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 		});
+		
+		waterTexture.polygonOffset = true;
+		waterTexture.depthTest = true;
+		waterTexture.polygonOffsetFactor = 1000;
+		waterTexture.polygonOffsetUnits = 5;
 
 		water = new THREE.Water(
 			waterGeometry,
@@ -687,95 +773,8 @@
 		// water.position.z = 100;
 		scene.add(water);
 
-		const partitions = 7;
-		const totalWallLength = 490;
-		const wallLength = totalWallLength / partitions; // 80 each section
-		const wallDepth = 3;
-		const xRepeat = 15 / partitions;
-		const yRepeat = 0.3 / partitions;
-		const zPosition = (riverWidth / 2) + (wallDepth / 2);
-		var wallHeight = baseLevel / partitions;
-
-		var wallTextureXZ = new THREE.TextureLoader().load("images/brickWall.jpg");
-		var wallTextureYZ = new THREE.TextureLoader().load("images/brickWall.jpg");
-		wallTextureXZ.wrapS = wallTextureXZ.wrapT = THREE.RepeatWrapping;
-		wallTextureYZ.wrapS = wallTextureYZ.wrapT = THREE.RepeatWrapping;
-
-		wallTextureXZ.repeat.set(xRepeat, yRepeat * (wallDepth / wallHeight));
-		wallTextureYZ.repeat.set(yRepeat * (wallDepth / wallHeight), yRepeat);
-
-		// for (var p = 0; p < partitions; p++) {
-			var p = 4;
-			let wallGeometry = new THREE.BoxBufferGeometry(wallLength, wallHeight * (p + 1), wallDepth);
-
-			let wallTextureXY = new THREE.TextureLoader().load("images/brickWall.jpg");
-			wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
-			wallTextureXY.repeat.set(xRepeat, yRepeat * (p + 1));
-
-			let wallMaterials = [
-				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // left
-				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // right
-				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // top
-				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // bottom
-				new THREE.MeshToonMaterial({ map: wallTextureXY }), // front
-				new THREE.MeshToonMaterial({ map: wallTextureXY }), // back
-			]
-
-			// let wallFrontObject = new THREE.Group();
-			// let wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
-			// wallFrontObject.add(wallFront);
-			// wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
-
-			// wallFront.position.x = -(totalWallLength / 2) + p * wallLength;
-        	// wallFront.position.y = yTotalOffset + (wallHeight / 2) * p;
-			// wallFront.position.z = zPosition;
-			// wallFront.position.z += zTotalOffset;
-
-			// (partitions - p) because the entire wall seems to be rotated by 180 degrees.
-			// wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	// wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			// wallFrontObject.position.z = zPosition;
-			// wallFrontObject.position.z += zTotalOffset;
-			// wallFrontObjects.push(wallFrontObject);
-			// scene.add(wallFront);
-
-			// let wallBackObject = new THREE.Group();
-			let wallBack = new THREE.Mesh(wallGeometry, wallMaterials); 
-			// wallBackObject.add(wallBack);
-			// wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
-			
-			wallBack.position.x = -(totalWallLength / 2) + p * wallLength;
-			wallBack.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallBack.position.z = -zPosition;
-			// wallBack.position.z += zTotalOffset;
-
-			// wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-			// wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			// wallBackObject.position.z = -zPosition;
-			// wallBackObject.position.z += zTotalOffset;
-			// wallBackObjects.push(wallBackObject);
-			scene.add(wallBack);
-		// }
-
-		// var meshGroup = new THREE.Group();
-		// var geometry = new THREE.CubeGeometry(10, 10, 10);
-		// var material = new THREE.MeshLambertMaterial({
-		// 	color: 0xff0000
-		// });
-		// var someMesh = new THREE.Mesh(geometry, material);
-		// // meshGroup.add(someMesh);
-		// // meshGroup.add(createOutline(geometry, outlineMaterial));
-		// // someMesh.position.y	= geometry.parameters.height/2
-		// someMesh.position.x = 1;
-		// someMesh.position.y = 1;
-		// someMesh.position.z = 1;
-		// scene.add(someMesh);
-
 		onRenderFcts.push(function() {
 			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
-			// console.log(water.rotation);
-			// console.log(wallBackObjects[0].rotation);
-			// console.log(stoneMeshes[0].rotation);
 			// water.position.y -= 0.1;
 			// water.position.z -= 0.1;
 		});
@@ -810,13 +809,14 @@
 		// mesh.position.y	= geometry.parameters.height/2
 		// arWorldRoot.add(mesh)
 		
-		var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-		var material	= new THREE.MeshNormalMaterial();
-		var mesh	= new THREE.Mesh( geometry, material );
-		mesh.position.y	= 0.5
-		arWorldRoot.add( mesh );
-		wildlifeInit(arWorldRoot);
-		// riverInit(arWorldRoot);
+		// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
+		// var material	= new THREE.MeshNormalMaterial();
+		// var mesh	= new THREE.Mesh( geometry, material );
+		// mesh.position.y	= 0.5
+		// arWorldRoot.add( mesh );
+		// wildlifeInit(arWorldRoot);
+		wallsStonesInit(arWorldRoot);
+		riverInit(arWorldRoot);
 		console.log(arWorldRoot);
 	})()
 
