@@ -491,8 +491,8 @@
 	const pebblePadding = 0;
 	const riverWidth = 60 * pebbleSpacing + pebblePadding;
 	var xTotalOffset = -50;
-	var yTotalOffset = -200;
-	var zTotalOffset = -400;
+	var yTotalOffset = -250;
+	var zTotalOffset = -300;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialise river model
@@ -775,7 +775,7 @@
 		scene.add(water);
 
 		onRenderFcts.push(function() {
-			water.material.uniforms[ "time" ].value += 1.0 / 60.0;
+			water.material.uniforms[ "time" ].value += 1.0 / 20.0;
 			// water.position.y -= 0.1;
 			// water.position.z -= 0.1;
 		});
