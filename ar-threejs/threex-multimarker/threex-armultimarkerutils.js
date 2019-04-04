@@ -105,39 +105,39 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 		var markersControlsParameters = [
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-hiro.patt',
+				patternUrl : '../pattern-files/pattern-hiro.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-arjs.patt',
+				patternUrl : '../pattern-files/pattern-arjs.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-kanji.patt',
+				patternUrl : '../pattern-files/pattern-kanji.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterA.patt',
+				patternUrl : '../pattern-files/pattern-letterA.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterB.patt',
+				patternUrl : '../pattern-files/pattern-letterB.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterC.patt',
+				patternUrl : '../pattern-files/pattern-letterC.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterF.patt',
+				patternUrl : '../pattern-files/pattern-letterF.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterD.patt',
+				patternUrl : '../pattern-files/pattern-letterD.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : absoluteBaseURL + 'examples/marker-training/examples/pattern-files/pattern-letterG.patt',
+				patternUrl : '../pattern-files/pattern-letterG.patt',
 			},
 		]		
 	}else if( trackingBackend === 'aruco' ){
