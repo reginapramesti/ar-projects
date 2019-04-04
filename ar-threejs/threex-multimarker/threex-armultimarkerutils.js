@@ -97,7 +97,7 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 	// create absoluteBaseURL
 	var link = document.createElement('a')
 	link.href = ARjs.Context.baseURL
-	var absoluteBaseURL = link.href
+	var absoluteBaseURL = 'https://reginapramesti.github.io/ar-projects/ar-threejs'
 
 	if( trackingBackend === 'artoolkit' ){
 		console.log(absoluteBaseURL);
@@ -105,39 +105,39 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 		var markersControlsParameters = [
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-hiro.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-hiro.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-arjs.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-arjs.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-kanji.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-kanji.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterA.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterA.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterB.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterB.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterC.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterC.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterF.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterF.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterD.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterD.patt',
 			},
 			{
 				type : 'pattern',
-				patternUrl : '../pattern-files/pattern-letterG.patt',
+				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterG.patt',
 			},
 		]		
 	}else if( trackingBackend === 'aruco' ){
