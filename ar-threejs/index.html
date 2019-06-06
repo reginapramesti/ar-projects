@@ -126,13 +126,13 @@
             let histMarkerRoot = new THREE.Group();
             scene.add(histMarkerRoot);
             let histMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, histMarkerRoot, {
-                type: 'pattern', patternUrl: "data/letterA.patt",
+                type: 'pattern', patternUrl: "data/pattern-past.patt",
             });
 
             let nowMarkerRoot = new THREE.Group();
             scene.add(nowMarkerRoot);
             let nowMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, nowMarkerRoot, {
-                type: 'pattern', patternUrl: "data/letterB.patt",
+                type: 'pattern', patternUrl: "data/pattern-now.patt",
             });
 
             // Random loading torus knot
