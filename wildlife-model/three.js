@@ -21,8 +21,6 @@ const xCamOffset = 0;
 const yCamOffset = -15;
 const zCamOffset = -50;
 
-var geometry;
-
 var loader = new THREE.OBJLoader();
 var outlineMaterial = new THREE.MeshLambertMaterial({
     color: 'black',
@@ -108,11 +106,6 @@ var loadObject = function (path, scale, kangarooColour, model) {
                 shininess: specularShininess,
                 side: THREE.FrontSide
             });
-            // objGroup.add(object);
-            // objGroup.add(createOutline(object.children[0].geometry, outlineMaterial));
-            // object.children[0].rotation.y = Math.random() * 2 * Math.PI;
-            // objGroup.position.set(position.x, position.y, position.z);
-            // object.children[0].scale.set(scale, scale, scale);
             if (model == 0) {
                 kangarooModel = object.children[0];
             } else if (model == 1) {
