@@ -1,905 +1,390 @@
 <!DOCTYPE html>
-<head>
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<title>Regina's AR Storytelling and Data Visualisation</title>
 
-	<link href="https://fonts.googleapis.com/css?family=Courgette" rel="stylesheet"> 
-	
-	<!-- include three.js library -->
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Hello, AR Cubes!</title>
+    <!-- include three.js library -->
 	<script src='three.js/three.js'></script>
 	<script src='three.js/stats.min.js'></script>
+    <!-- include jsartookit -->
+    <script src="jsartoolkit5/artoolkit.min.js"></script>
+    <script src="jsartoolkit5/artoolkit.api.js"></script>
+    <!-- include threex.artoolkit -->
+    <script src="threex/threex-artoolkitsource.js"></script>
+    <script src="threex/threex-artoolkitcontext.js"></script>
+    <script src="threex/threex-arbasecontrols.js"></script>
+    <script src="threex/threex-armarkercontrols.js"></script>
 
-	<!-- include jsartookit -->
-	<script src="jsartoolkit5/artoolkit.min.js"></script>
-	<script src="jsartoolkit5/artoolkit.api.js"></script>
-	
-	<!-- include threex.artoolkit -->
-	<script src="threex/threex-artoolkitsource.js"></script>
-	<script src="threex/threex-artoolkitcontext.js"></script>
-	<script src="threex/threex-artoolkitprofile.js"></script>
-	<script src="threex/threex-arbasecontrols.js"></script>
-	<script src="threex/threex-armarkercontrols.js"></script>
-	<script src="threex/threex-arsmoothedcontrols.js"></script>
-	<script src="threex/threex-armarkerhelper.js"></script>
-	
-	<!-- include threeex multimarker -->
-	<script src='threex-multimarker/threex-armultimarkerutils.js'></script>
-	<script src='threex-multimarker/threex-armultimarkercontrols.js'></script>
-	<script src='threex-multimarker/threex-armultimarkerlearning.js'></script>
-
+    <!-- include object loader function -->
 	<script src="js/OBJLoader.js"></script>
-	<script src="js/OrbitControls.js"></script>
-	<script src="js/Water.js"></script>
-	<!-- <script src="js/river-model.js"></script> -->
-	<!-- <script src="js/wildlife-model.js"></script> -->
-
-	<style>
-		#narrativeText {
-			font-family: 'Courgette', cursive;
-			font-size: 3em;
-			text-align: center;
-			position: absolute; 
-			top: 0; 
-			left: 0; 
-			height: 96%; 
-			width: 96%;
-			display: table;
-			z-index: 1;
-			margin: 20px;
-		}
-
-		#narrativeText p {
-			display: table-cell;
-			vertical-align: middle;
-		}
-	</style>
 </head>
 
-
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1';>
-	<a href='https://github.com/jeromeetienne/AR.js/' target='_blank'>AR.js</a> - Multi marker
-	by <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
-	</div>
-	<div id="narrativeText">
-		<p id="text">Thank you and welcome to Regina's AR demo! First and foremost let me take you back in time</p>
-	</div>
-	<!-- info at the top of page -->
-	<div style='position: fixed; bottom: 10px; width:100%; text-align: center;z-index:1';>
-		<!-- tracking backend: 
-			<a href='javascript:void(0)' onclick='trackingBackendSet("artoolkit")'>artoolkit</a>
-		<br>
-		<a href='javascript:void(0)' onclick='markerHelpersToggleVisibility()'>Marker helpers</a>
-		- -->
-		<a href='javascript:void(0)' onclick='resetMarkerFile()'>reset area</a>
-	</div>
-	<!-- display record button -->
-	<div style='position: fixed; bottom: 16px; right: 16px; z-index:1';>
-		<style>
-			#recordButton:hover {
-				cursor: pointer;
-			}
-		</style>
-		<img id='recordButton' src="images/rightarrow.png" width='64px'  height='64px'>
-	</div>
-
-	<!-- ----------------------------------------------------------- -->
-<script>
-;(function(){
-	var markersLearned = false;
-	var clickCounter = 0;
-
-	// Global Object Variables
-	var treeGroups = [];
-	var objGroups = [];
-	var treePositions = [];
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Init
-	//////////////////////////////////////////////////////////////////////////////////
-
-	// init renderer
-	var renderer = new THREE.WebGLRenderer({
-		alpha: true
-	});
-	// Make the screen non-transparent so it doesn't show the webcam aspect.
-	// var renderer = new THREE.WebGLRenderer();
-	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	renderer.domElement.style.position = 'absolute'
-	renderer.domElement.style.top = '0px'
-	renderer.domElement.style.left = '0px'
-	document.body.appendChild( renderer.domElement );
-
-	// init scene and camera
-	var scene	= new THREE.Scene();
-	let ambientLight = new THREE.AmbientLight( 0xcccccc );
-	scene.add( ambientLight );
-	
-    let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(1, 1, 1).normalize();
-    scene.add(directionalLight);
-	// array of functions for the rendering loop
-	var onRenderFcts= [];
-
-	onRenderFcts.push(function() {
-		if (markersLearned) {
-			scene.background = null;
-			document.getElementById("text").innerHTML="";
-		} else {
-			scene.background = new THREE.Color(0xffffff);
-		}
-	})
-
-	////////////////////////////////////////////////////////////////////////////////
-	//          handle urlOptions
-	////////////////////////////////////////////////////////////////////////////////
-
-	var hasHash = location.hash.substring(1) !== '' ? true : false
-	if( hasHash === true ){
-		var urlOptions = JSON.parse(decodeURIComponent(location.hash.substring(1)))
-		markersLearned = (urlOptions.markersLearned !== undefined);
-	}else{
-		var urlOptions = {
-			trackingBackend: 'artoolkit',
-		}
-	}
-	window.urlOptions = urlOptions
-	urlOptionsUpdate()
-	function urlOptionsUpdate(){
-		location.hash = '#'+encodeURIComponent(JSON.stringify(urlOptions))
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Initialize a basic camera
-	//////////////////////////////////////////////////////////////////////////////////
-
-	// Create a camera
-	if( urlOptions.trackingBackend === 'artoolkit' ){
-		var camera = new THREE.Camera();
-	}else console.assert(false)
-	scene.add(camera);
-
-	////////////////////////////////////////////////////////////////////////////////
-	//          handle arToolkitSource
-	////////////////////////////////////////////////////////////////////////////////
-
-	var artoolkitProfile = new ARjs.Profile()
-	artoolkitProfile.sourceWebcam()
-		.trackingBackend(urlOptions.trackingBackend)
-
-	var arToolkitSource = new ARjs.Source(artoolkitProfile.sourceParameters)
-
-	arToolkitSource.init(function onReady(){
-		onResize()
-	})
-	
-	// handle resize
-	window.addEventListener('resize', function(){
-		onResize()
-	})
-	function onResize(){
-		arToolkitSource.onResizeElement()
-		arToolkitSource.copyElementSizeTo(renderer.domElement)	
-		if( urlOptions.trackingBackend === 'artoolkit' ){
-			if( arToolkitContext.arController !== null ){
-				arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)	
-			}		
-		}else console.assert(false)
-	}
-
-	////////////////////////////////////////////////////////////////////////////////
-	//          initialize arToolkitContext
-	////////////////////////////////////////////////////////////////////////////////	
-
-	// create atToolkitContext
-	var arToolkitContext = new ARjs.Context(artoolkitProfile.contextParameters)
-	// initialize it
-	arToolkitContext.init(function onCompleted(){
-		// if artoolkit, copy projection matrix to camera
-		if( arToolkitContext.parameters.trackingBackend === 'artoolkit' ){
-			camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );			
-		}
-	})
-
-	// update artoolkit on every frame
-	onRenderFcts.push(function(){
-		if( arToolkitSource.ready === false )	return
-
-		arToolkitContext.update( arToolkitSource.domElement )
-	})
-
-	//////////////////////////////////////////////////////////////////////////////
-	//		get multiMarkerFile
-	//////////////////////////////////////////////////////////////////////////////
-	
-	// if no localStorage.ARjsMultiMarkerFile, then write one with default marker
-	if( localStorage.getItem('ARjsMultiMarkerFile') === null ){
-		THREEx.ArMultiMarkerUtils.storeDefaultMultiMarkerFile(urlOptions.trackingBackend)
-	}
-	
-	// get multiMarkerFile from localStorage
-	console.assert( localStorage.getItem('ARjsMultiMarkerFile') !== null )
-	var multiMarkerFile = localStorage.getItem('ARjsMultiMarkerFile')
-
-	//////////////////////////////////////////////////////////////////////////////
-	//		Create ArMultiMarkerControls
-	//////////////////////////////////////////////////////////////////////////////
-	// build a markerRoot
-	var markerRoot = new THREE.Group()
-	scene.add(markerRoot)
-	
-	// build a multiMarkerControls
-	var multiMarkerControls = THREEx.ArMultiMarkerControls.fromJSON(arToolkitContext, scene, markerRoot, multiMarkerFile)
-
-	// build a smoothedControls
-	var smoothedRoot = new THREE.Group()
-	scene.add(smoothedRoot)
-	var smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot)
-	onRenderFcts.push(function(delta){
-		// update smoothedControls parameters depending on how many markers are visible in multiMarkerControls
-		multiMarkerControls.updateSmoothedControls(smoothedControls)
-		// update smoothedControls position
-		smoothedControls.update(markerRoot)
-	})
-
-	//////////////////////////////////////////////////////////////////////////////
-	//		markerHelpers
-	//////////////////////////////////////////////////////////////////////////////
-
-	// display THREEx.ArMarkerHelper if needed - useful to debug
-	var markerHelpers = []
-	multiMarkerControls.subMarkersControls.forEach(function(subMarkerControls){
-		// add an helper to visuable each sub-marker
-		var markerHelper = new THREEx.ArMarkerHelper(subMarkerControls)
-		markerHelpers.push(markerHelper)
-		subMarkerControls.object3d.add( markerHelper.object3d )		
-	})
-
-	function markerHelpersToggleVisibility(){
-		var wasVisible = markerHelpers[0].object3d.visible 
-		markerHelpers.forEach(function(markerHelper){
-			markerHelper.object3d.visible = wasVisible ? false : true
-		})
-	}
-	window.markerHelpersToggleVisibility = markerHelpersToggleVisibility
-
-	//////////////////////////////////////////////////////////////////////////////
-	//		init UI
-	//////////////////////////////////////////////////////////////////////////////
-
-	document.querySelector('#recordButton').addEventListener('click', function(){
-		urlOptionsUpdate()
-
-		if (!markersLearned) {
-			if (clickCounter == 0) {
-				document.getElementById("text").innerHTML = "Let's try to familiarise ourselves with the layout of the area first"
-				document.getElementById("recordButton").src="images/search.png";
-				clickCounter++;
-			} else {
-				THREEx.ArMultiMarkerUtils.navigateToLearnerPage('learner.html', urlOptions.trackingBackend)
-			}
-		} else {
-			// Open up the other visuals
-			location.href = 'river.html';
-		}
-	})
-	
-	window.resetMarkerFile = function(){
-		THREEx.ArMultiMarkerUtils.storeDefaultMultiMarkerFile(urlOptions.trackingBackend)
-		location.reload()
-		markersLearned = false;
-	}
-
-	
-	function trackingBackendSet(trackingBackend){
-		THREEx.ArMultiMarkerUtils.storeDefaultMultiMarkerFile(trackingBackend)
-		
-		urlOptions.trackingBackend = trackingBackend
-		urlOptionsUpdate()
-		
-		location.reload()
-	}
-	window.trackingBackendSet = trackingBackendSet
-
-	// Function shared by all three models
-	
-	var createOutline = function (geometry, material) {
-		const outlineScale = 1.03;
-		var objOutline = new THREE.Mesh(geometry, material);
-		objOutline.scale.set(outlineScale, outlineScale, outlineScale);
-		return objOutline;
-	}
-	var outlineMaterial = new THREE.MeshLambertMaterial({
-		color: 'black',
-		side: THREE.BackSide,
-	});
-	outlineMaterial.polygonOffset = true;
-	outlineMaterial.depthTest = true;
-	outlineMaterial.polygonOffsetFactor = 1000;
-	outlineMaterial.polygonOffsetUnits = 2;
-	outlineMaterial.onBeforeCompile = (shader) => {
-		const token = `#include <begin_vertex>`
-		const customTransform = `
-				vec3 transformed = position + objectNormal*0.02;
-			`
-		shader.vertexShader =
-			shader.vertexShader.replace(token, customTransform)
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Initialise wildlife model
-	//////////////////////////////////////////////////////////////////////////////////
-	var wildlifeInit = function(scene) {
-
-		// Setup the sound files
-		var forestSE = new Audio("audio/rainforestambience.mp3");
-		forestSE.loop = true;
-		
-		var listener = new THREE.AudioListener();
-		var audio = new THREE.Audio(listener);
-		audio.setMediaElementSource(forestSE);
-
-		forestSE.play();
-
-		const yTotalOffset = -20;
-
-		var worldScale = 2;
-		var alpha = 0;
-		var beta = 0;
-		var diffuseColor = new THREE.Color(0xcd6237);
-		var specularShininess = Math.pow(2, alpha * 10);
-		var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
-
-		var loader = new THREE.OBJLoader();
-		var outlineMaterial = new THREE.MeshLambertMaterial({
-			color: 'black',
-			side: THREE.BackSide
-		});
-		outlineMaterial.onBeforeCompile = (shader) => {
-			const token = `#include <begin_vertex>`
-			const customTransform = `
-				vec3 transformed = position + objectNormal*0.02;
-			`
-			shader.vertexShader =
-				shader.vertexShader.replace(token, customTransform)
-		};
-
-		var treeGroups = [];
-		var treeModels = [];
-		var objGroups = [];
-		var treePositions = [];
-
-		var treeOutlineMaterial = new THREE.MeshLambertMaterial({
-			color: 'black',
-			side: THREE.BackSide
-		});
-
-		var treeMaterials = [
-			new THREE.MeshToonMaterial({
-				color: new THREE.Color(0x3b802f),
-				specular: specularColor,
-				reflectivity: beta,
-				shininess: specularShininess,
-				side: THREE.FrontSide
-			}),
-			new THREE.MeshToonMaterial({
-				color: new THREE.Color(0xa67344),
-				specular: specularColor,
-				reflectivity: beta,
-				shininess: specularShininess,
-				side: THREE.FrontSide
-			})
-		];
-
-		var objectsLoaded = 0;
-		var kangarooModel;
-		var boneModel;
-
-		// var createOutline = function (geometry, material) {
-		// 	const outlineScale = 1.03;
-		// 	var objOutline = new THREE.Mesh(geometry, material);
-		// 	objOutline.scale.set(outlineScale, outlineScale, outlineScale);
-		// 	return objOutline;
-		// }
-
-		var onTreesLoaded = function (treeObject) {
-			wait = false;
-			var treeGroup = new THREE.Group();
-
-			treeObject.children[0].material = treeMaterials;
-			// treeGroup.add(treeObject);
-			// treeGroup.add(createOutline(treeObject.children[0].geometry, treeOutlineMaterial));
-			treeModels.push(treeObject.children[0]); 
-			objectsLoaded++;
-
-			console.log("treeModels in onTreesLoaded");
-			console.log(treeModels);
-			if (objectsLoaded == 7)
-				populateForest();
-		};
-
-		var onObjectLoading = function (xhr) {
-			console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-		}
-
-		var onObjectLoadError = function (error) {
-			console.log('An error has happened');
-		}
-
-		var loadObject = function (path, scale, diffuseColor, model) {
-			loader.load(
-				path,
-				function (object) {
-
-					object.children[0].material = new THREE.MeshToonMaterial({
-						color: diffuseColor,
-						specular: specularColor,
-						reflectivity: beta,
-						shininess: specularShininess,
-						side: THREE.FrontSide
-					});
-					if (model == 0) {
-						kangarooModel = object.children[0];
-					} else if (model == 1) {
-						boneModel = object.children[0];
-					}
-					objectsLoaded++;
-
-					if (objectsLoaded == 7)
-						populateForest();
-				},
-				onObjectLoading,
-				onObjectLoadError
-			)
-		}
-
-		for (let treeIndex = 1; treeIndex <= 5; treeIndex++) {
-			loader.load(
-				'obj/Tree' + treeIndex + '/tree.obj',
-				onTreesLoaded,
-				onObjectLoading,
-				onObjectLoadError
-			);
-		}
-		loadObject('obj/Kangaroo.obj', 0.2 * worldScale, diffuseColor, 0);
-		loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
-
-		// tree trunk: #a67344
-		// tree leaves: #3b802f
-
-		var populateForest = function() {
-			var spacing = 8 * worldScale; 
-			var spacingDelta = 0.05 * worldScale;
-			var noise = 2 * worldScale;
-			const rangeX = 50 * worldScale;
-			const rangeZ = 20 * worldScale;
-			var xPos = -rangeX;
-			var zPos = -rangeZ;
-			var kangaCount = Math.floor(rangeX / 3 / worldScale);
-			var boneCount = 0;
-
-			const treeSize = 8 * worldScale;
-			
-			while (xPos <= rangeX) {
-				zPos = -rangeZ;
-				while (zPos <= rangeZ) {
-					let treeIndex = Math.floor(Math.random() * 5 + 1);
-					let treeMesh = treeModels[treeIndex - 1].clone();
-					let treeObject = new THREE.Group();
-					treeObject.add(treeMesh);
-					// treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
-					treeObject.scale.set(treeSize, treeSize, treeSize);
-					treeObject.rotation.y = Math.random() * Math.PI;
-					var noiseX = Math.random() * noise * 2 - noise;
-					var noiseZ = Math.random() * noise * 2 - noise;
-					treeObject.position.set(xPos + noiseX, yTotalOffset, zPos + noiseZ);
-					scene.add(treeObject);
-					treeGroups.push(treeObject);
-					// treePositions.push({ x: xPos + noiseX, z: zPos + noiseZ });
-			
-					spacing += spacingDelta;
-					zPos += spacing;
-				}
-				spacingDelta += spacingDelta;
-				noise += spacingDelta;
-				xPos += spacing;
-			
-				for (let k = 0; k < kangaCount; k++) {
-					const kangaScale = 0.2 * worldScale;
-					let kangarooXPos = xPos + Math.random() * noise * 6 - noise;
-					let kangarooZPos = Math.random() * rangeZ * 2 - rangeZ;
-					let kangaroo = kangarooModel.clone();
-					let kangarooObject = new THREE.Group();
-					kangarooObject.add(kangaroo);
-					// kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
-					kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
-					kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
-					kangarooObject.position.set(kangarooXPos, yTotalOffset, kangarooZPos);
-					scene.add(kangarooObject);
-				}
-				for (let b = 0; b < boneCount; b++) {
-					const boneScale = 0.008 * worldScale;
-					let boneXPos = xPos + Math.random() * noise * 6 - noise;
-					let boneZPos = Math.random() * rangeZ * 2 - rangeZ;
-					let bone = boneModel.clone();
-					let boneObject = new THREE.Group();
-					boneObject.add(bone);
-					// boneObject.add(createOutline(bone.geometry, outlineMaterial));
-					boneObject.rotation.y = Math.random() * 2 * Math.PI;
-					boneObject.scale.set(boneScale, boneScale, boneScale);
-					boneObject.position.set(boneXPos, yTotalOffset, boneZPos);
-					scene.add(boneObject);
-				}
-			
-				kangaCount -= 2 * worldScale;
-				boneCount += 0.5 * worldScale;
-			}
-		}
-	}
-
-	const pebbleSpacing = 2.6;
-	const pebblePadding = 0;
-	const riverWidth = 60 * pebbleSpacing + pebblePadding;
-	var xTotalOffset = -50;
-	var yTotalOffset = -250;
-	var zTotalOffset = -300;
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Initialise river model
-	//////////////////////////////////////////////////////////////////////////////////
-
-	var wallsStonesInit = function(scene) {
-
-		var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
-		var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
-		var rcp60 = [{ "year": 2040, "rainfall": -1.3998901 }, { "year": 2050, "rainfall": -2.1936162 }, { "year": 2060, "rainfall": -2.1142256 }, { "year": 2070, "rainfall": 2.386432 }, { "year": 2080, "rainfall": 10.35757 }, { "year": 2090, "rainfall": 5.697372 }];
-		var rcp85 = [{ "year": 2040, "rainfall": 0.91791856 }, { "year": 2050, "rainfall": 1.6345977 }, { "year": 2060, "rainfall": 0.35585436 }, { "year": 2070, "rainfall": 2.4581237 }, { "year": 2080, "rainfall": 7.7386603 }, { "year": 2090, "rainfall": 5.343646 }];
-
-		var stoneMeshes = [];
-		var wallFrontObjects = [];
-		var wallBackObjects = [];
-
-		const baseLevel = 15;
-
-		function createShapes() {
-
-			var shapes = [];
-			// Bottom to top
-
-			// First pebble shape
-			// Rotate -Math.PI / 15
-			var shape = new THREE.Shape();
-			shape.moveTo(-3, 3);
-			shape.bezierCurveTo(-3, 3.5, -2.5, 4, -2, 4);
-			shape.lineTo(2, 4);
-			shape.bezierCurveTo(2.5, 4, 3, 3.5, 3, 3);
-			shape.lineTo(3, -3);
-			shape.bezierCurveTo(3, -3.5, 2.5, -4, 2, -4);
-			shape.lineTo(-2, -4);
-			shape.bezierCurveTo(-2.5, -4, -3, -3.5, -3, -3);
-			shape.lineTo(-3, 3);
-			shapes.push(shape);
-
-			// Second pebble shape
-			// Rotate Math.PI / 60
-			shape = new THREE.Shape();
-			shape.moveTo(-2, 3.5);
-			shape.lineTo(2, 3.5);3
-			shape.bezierCurveTo(2.25, 3.5, 2.75, 3, 3, 2.5);
-			shape.lineTo(4, -2.5);
-			shape.bezierCurveTo(4, -3, 3.5, -3.5, 3, -3.5);
-			shape.lineTo(-2, -4);
-			shape.bezierCurveTo(-3, -4, -3.25, -3, -3.25, -2.5);
-			shape.lineTo(-3, 2.5);
-			shape.bezierCurveTo(-2.85, 3, -2.5, 3.5, -2, 3.5);
-			shapes.push(shape);
-
-			// Third pebble shape
-			// Rotate -Math.PI / 10
-			shape = new THREE.Shape();
-			shape.moveTo(-3.5, 2);
-			shape.bezierCurveTo(-3.5, 2.5, -3, 3, -2.5, 3);
-			shape.lineTo(4.5, 3);
-			shape.bezierCurveTo(4.75, 3, 5.25, 2.67, 5, 2);
-			shape.lineTo(3.5, -2);
-			shape.bezierCurveTo(3.25, -2.67, 2.75, -3, 2.5, -3);
-			shape.lineTo(-2.5, -3);
-			shape.bezierCurveTo(-3, -3, -3.5, -2.5, -3.5, -2);
-			shape.lineTo(-3.5, 2);
-			shapes.push(shape);
-
-			// Fourth pebble shape
-			// Rotate -Math.PI / 18;
-			shape = new THREE.Shape();
-			shape.moveTo(-3, 2);
-			shape.bezierCurveTo(-3, 2.75, -2.75, 3, -2, 3);
-			shape.lineTo(2, 3);
-			shape.bezierCurveTo(2.75, 3, 3, 2.75, 3, 2);
-			shape.lineTo(3, -2);
-			shape.bezierCurveTo(3, -2.75, 2.75, -3, 2, -3);
-			shape.lineTo(-2, -3);
-			shape.bezierCurveTo(-2.75, -3, -3, -2.75, -3, -2);
-			shape.lineTo(-3, 2);
-			shapes.push(shape);
-
-			// Fifth pebble shape
-			// Rotate 0
-			shape = new THREE.Shape();
-			shape.moveTo(-4, 2);
-			shape.bezierCurveTo(-4.1, 2.8, -3.25, 3, -3, 3);
-			shape.lineTo(3, 3);
-			shape.bezierCurveTo(3.25, 3, 4.75, 3, 4.5, 2);
-			shape.lineTo(3.5, -2);
-			shape.bezierCurveTo(3.4, -2.4, 3, -3, 2.5, -3);
-			shape.lineTo(-2, -3);
-			shape.bezierCurveTo(-2.5, -3, -3.25, -3, -3.5, -2);
-			shape.lineTo(-4, 2);
-			shapes.push(shape);
-
-			// Sixth pebble shape
-			// Rotate 0
-			shape = new THREE.Shape();
-			shape.moveTo(-5, 2);
-			shape.bezierCurveTo(-5.28125, 2.75, -5, 3, -2, 3);
-			shape.lineTo(2, 3);
-			shape.bezierCurveTo(2.5, 3, 3.5, 3, 4, 2);
-			shape.lineTo(5, 0);
-			shape.bezierCurveTo(6, -2, 6, -3, 2, -3);
-			shape.lineTo(-2, -3);
-			shape.bezierCurveTo(-3, -3, -3.40625, -2.25, -3.5, -2);
-			shape.lineTo(-5, 2);
-			shapes.push(shape);
-			
-			return shapes;
-		}
-
-		// Inspired by https://discourse.threejs.org/t/round-edged-box/1402
-		function createRoundedPebblesGeometry( shape, depth, radius0, smoothness ) {
-			let eps = 0.00001;
-			let radius = radius0 - eps;
-			let geometry = new THREE.ExtrudeGeometry( shape, {
-			amount: depth - radius0 * 2,
-			bevelEnabled: true,
-			bevelSegments: smoothness * 2,
-			steps: 1,
-			bevelSize: radius,
-			bevelThickness: radius0,
-			curveSegments: smoothness
-			});
-			
-			return geometry;
-		}
-
-		const dataScaleFactor = 6;
-		const zOffset = 2070; // so they will be positioned at 25, 15, 5, -5, -15, -25
-		const yOffset = 10;
-		const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
-		var stoneMaterials = new THREE.MeshToonMaterial({ 
-			color: 0x786f74,
-		 });
-		var shapes = createShapes();
-		const stoneScale = 0.7;
-		const pebbleDepth = 8;
-		const bevelRadius = pebbleDepth / 2 + 0.1;
-		const rotationNoise = 0;//Math.PI / 3;
-
-		rcp85.forEach((rainfallValue, index) => {
-
-			let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
-
-			for (let pebbleIx = 0; pebbleIx < pebbleCount; pebbleIx++) {
-				let geometry = createRoundedPebblesGeometry(shapes[index], pebbleDepth, bevelRadius, 4);
-
-				// Inspired by https://stackoverflow.com/questions/51509292/threejs-hemisphere
-				for (var i = 0; i < geometry.vertices.length; i++) {
-					var vertex = geometry.vertices[i];
-					if (vertex.z > 0) {
-						vertex.z = 0;
-					}
-				}
-
-				geometry.computeFaceNormals();
-				geometry.computeVertexNormals();
-				geometry.verticesNeedUpdate = true;
-
-				let mesh = new THREE.Mesh(geometry, stoneMaterials);
-
-				let stoneObject = new THREE.Group();
-				stoneObject.add(mesh);
-				stoneObject.add(createOutline(geometry, outlineMaterial));
-				stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
-
-				stoneObject.position.z = zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
-				stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2) * pebbleIx);
-				stoneObject.position.x = xTotalOffset;
-				stoneObject.rotation.x = -Math.PI / 2;
-				// stoneObject.rotation.y = Math.PI; // seems to be rotated 180 degrees?
-				stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
-
-				stoneMeshes.push(stoneObject);
-				scene.add(stoneObject);
-			}
-		});
-
-		const partitions = 7;
-		const totalWallLength = 490;
-		const wallLength = totalWallLength / partitions; // 80 each section
-		const wallDepth = 3;
-		const xRepeat = 15 / partitions;
-		const yRepeat = 0.3 / partitions;
-		const zPosition = (riverWidth / 2) + (wallDepth / 2) + 7; // space between wall and river just because
-		var wallHeight = baseLevel / partitions;
-
-		var wallTextureXZ = new THREE.TextureLoader().load("images/brickWall.jpg");
-		var wallTextureYZ = new THREE.TextureLoader().load("images/brickWall.jpg");
-		wallTextureXZ.wrapS = wallTextureXZ.wrapT = THREE.RepeatWrapping;
-		wallTextureYZ.wrapS = wallTextureYZ.wrapT = THREE.RepeatWrapping;
-
-		wallTextureXZ.repeat.set(xRepeat, yRepeat * (wallDepth / wallHeight));
-		wallTextureYZ.repeat.set(yRepeat * (wallDepth / wallHeight), yRepeat);
-
-		for (var p = 0; p < partitions; p++) {
-			// var p = 4;
-			let wallGeometry = new THREE.BoxBufferGeometry(wallLength, wallHeight * (p + 1), wallDepth);
-
-			let wallTextureXY = new THREE.TextureLoader().load("images/brickWall.jpg");
-			wallTextureXY.wrapS = wallTextureXY.wrapT = THREE.RepeatWrapping;
-			wallTextureXY.repeat.set(xRepeat, yRepeat * (p + 1));
-
-			let wallMaterials = [
-				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // left
-				new THREE.MeshToonMaterial({ map: wallTextureYZ }), // right
-				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // top
-				new THREE.MeshToonMaterial({ map: wallTextureXZ }), // bottom
-				new THREE.MeshToonMaterial({ map: wallTextureXY }), // front
-				new THREE.MeshToonMaterial({ map: wallTextureXY }), // back
-			]
-
-			let wallFrontObject = new THREE.Group();
-			let wallFront = new THREE.Mesh(wallGeometry, wallMaterials);
-			wallFrontObject.add(wallFront);
-			wallFrontObject.add(createOutline(wallGeometry, outlineMaterial));
-
-			wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallFrontObject.position.z = zPosition;
-			wallFrontObject.position.z += zTotalOffset;
-
-			// (partitions - p) because the entire wall seems to be rotated by 180 degrees.
-			// wallFrontObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	// wallFrontObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			// wallFrontObject.position.z = zPosition;
-			// wallFrontObject.position.z += zTotalOffset;
-			wallFrontObjects.push(wallFrontObject);
-			scene.add(wallFrontObject);
-
-			
-			let wallBackObject = new THREE.Group();
-			let wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
-			wallBackObject.add(wallBack);
-			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
-
-			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallBackObject.position.z = -zPosition;
-			wallBackObject.position.z += zTotalOffset;
-			scene.add(wallBackObject);
-		}
-
-	}
-
-	var riverInit = function(scene) {
-
-		var water;
-		var waterTexture;
-
-		var waterGeometry = new THREE.PlaneBufferGeometry(600, riverWidth);
-		waterTexture = new THREE.TextureLoader().load('images/waternormals.jpg', function (texture) {
-			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-		});
-		
-		waterTexture.polygonOffset = true;
-		waterTexture.depthTest = true;
-		waterTexture.polygonOffsetFactor = 1000;
-		waterTexture.polygonOffsetUnits = 5;
-
-		water = new THREE.Water(
-			waterGeometry,
-			{
-				textureWidth: 852,
-				textureHeight: 480,
-				waterNormals: waterTexture,
-				alpha: 1.0,
-            	sunDirection: directionalLight.position.clone().normalize(),
-				sunColor: 0xffffff,
-				waterColor: 0x79cfe5,
-				distortionScale: 3.7,
-				fog: scene.fog !== undefined
-			}
-		);
-		water.rotation.x = -Math.PI / 2;
-		water.position.y = yTotalOffset;
-		water.position.z = zTotalOffset;
-		// water.position.y = -100;
-		// water.position.z = 100;
-		scene.add(water);
-
-		onRenderFcts.push(function() {
-			water.material.uniforms[ "time" ].value += 1.0 / 20.0;
-			// water.position.y -= 0.1;
-			// water.position.z -= 0.1;
-		});
-	}
-	
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Add simple object on smoothedRoot
-	//////////////////////////////////////////////////////////////////////////////////
-
-	;(function(){
-		var arWorldRoot = new THREE.Group()
-		var averageMatrix = THREEx.ArMultiMarkerControls.computeCenter(multiMarkerFile)
-		averageMatrix.decompose(arWorldRoot.position, arWorldRoot.quaternion, arWorldRoot.scale)		
-		smoothedRoot.add(arWorldRoot)
-		// markerRoot.add(arWorldRoot)
-
-
-		// var screenAsPortal = new THREEx.ScreenAsPortal(multiMarkerFile)
-		// arWorldRoot.add(screenAsPortal.object3d)
-
-		var mesh = new THREE.AxisHelper()
-		arWorldRoot.add(mesh)
-		
-		// // add a torus knot	
-		// var geometry	= new THREE.CubeGeometry(1,1,1);
-		// var material	= new THREE.MeshNormalMaterial({
-		// 	transparent : true,
-		// 	opacity: 0.5,
-		// 	side: THREE.DoubleSide
-		// }); 
-		// var mesh	= new THREE.Mesh( geometry, material );
-		// mesh.position.y	= geometry.parameters.height/2
-		// arWorldRoot.add(mesh)
-		
-		// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-		// var material	= new THREE.MeshNormalMaterial();
-		// var mesh	= new THREE.Mesh( geometry, material );
-		// mesh.position.y	= 0.5
-		// arWorldRoot.add( mesh );
-		// wildlifeInit(arWorldRoot);
-		// wallsStonesInit(arWorldRoot);
-		if (markersLearned)
-			wildlifeInit(arWorldRoot);
-	})()
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//		render the whole thing on the page
-	//////////////////////////////////////////////////////////////////////////////////
-	var stats = new Stats();
-	// document.body.appendChild( stats.dom );
-
-	// render the scene
-	onRenderFcts.push(function(){
-		renderer.render( scene, camera );
-		stats.update();
-	})
-
-	// run the rendering loop
-	var lastTimeMsec= null
-	requestAnimationFrame(function animate(nowMsec){
-		// keep looping
-		requestAnimationFrame( animate );
-		// measure time
-		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
-		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
-		lastTimeMsec	= nowMsec
-		// call each update function
-		onRenderFcts.forEach(function(onRenderFct){
-			onRenderFct(deltaMsec/1000, nowMsec/1000)
-		})
-	})
-})()
-</script>
-	<!-- <script src="js/model.js"></script> -->
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+    <!-- 
+  Example created by Lee Stemkoski: https://github.com/stemkoski
+  Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
+-->
+
+    <script>
+
+        var scene, camera, renderer, clock, deltaTime, totalTime;
+
+        var arToolkitSource, arToolkitContext;
+
+        var markerRoot1, markerRoot2;
+
+        var mesh1;
+
+        initialize();
+        animate();
+
+        function initialize() {
+            scene = new THREE.Scene();
+
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+            scene.add(ambientLight);
+
+            camera = new THREE.Camera();
+            scene.add(camera);
+
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true
+            });
+            renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+            renderer.setSize(640, 480);
+            renderer.domElement.style.position = 'absolute'
+            renderer.domElement.style.top = '0px'
+            renderer.domElement.style.left = '0px'
+            document.body.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+            deltaTime = 0;
+            totalTime = 0;
+
+            ////////////////////////////////////////////////////////////
+            // setup arToolkitSource
+            ////////////////////////////////////////////////////////////
+
+            arToolkitSource = new THREEx.ArToolkitSource({
+                sourceType: 'webcam',
+            });
+
+            function onResize() {
+                arToolkitSource.onResize()
+                arToolkitSource.copySizeTo(renderer.domElement)
+                if (arToolkitContext.arController !== null) {
+                    arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)
+                }
+            }
+
+            arToolkitSource.init(function onReady() {
+                onResize()
+            });
+
+            // handle resize event
+            window.addEventListener('resize', function () {
+                onResize()
+            });
+
+            ////////////////////////////////////////////////////////////
+            // setup arToolkitContext
+            ////////////////////////////////////////////////////////////	
+
+            // create atToolkitContext
+            arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: 'data/camera_para.dat',
+                detectionMode: 'mono'
+            });
+
+            // copy projection matrix to camera when initialization complete
+            arToolkitContext.init(function onCompleted() {
+                camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            });
+
+            ////////////////////////////////////////////////////////////
+            // setup markerRoots
+            ////////////////////////////////////////////////////////////
+
+            let patternArray = ["letterA", "letterB"];
+            let histMarkerRoot = new THREE.Group();
+            scene.add(histMarkerRoot);
+            let histMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, histMarkerRoot, {
+                type: 'pattern', patternUrl: "data/letterA.patt",
+            });
+
+            let nowMarkerRoot = new THREE.Group();
+            scene.add(nowMarkerRoot);
+            let nowMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, nowMarkerRoot, {
+                type: 'pattern', patternUrl: "data/letterB.patt",
+            });
+
+            // for (let i = 0; i < 2; i++) {
+            //     let markerRoot = new THREE.Group();
+            //     scene.add(markerRoot);
+            //     let markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+            //         type: 'pattern', patternUrl: "data/" + patternArray[i] + ".patt",
+            //     });
+
+            //     let mesh = new THREE.Mesh(
+            //         new THREE.CubeGeometry(1.25, 1.25, 1.25),
+            //         new THREE.MeshBasicMaterial({ color: colorArray[i], map: texture, transparent: true, opacity: 0.5 })
+            //     );
+            //     mesh.position.y = 1.25 / 2;
+            //     markerRoot.add(mesh);
+            // }
+
+            // three.js scene
+
+            var worldScale = 2;
+            var alpha = 0;
+            var beta = 0;
+            var kangarooColour = new THREE.Color(0xcd6237);
+            var specularShininess = Math.pow(2, alpha * 10);
+            var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
+
+            const xCamOffset = 0;
+            const yCamOffset = -15;
+            const zCamOffset = -50;
+
+            var loader = new THREE.OBJLoader();
+            var outlineMaterial = new THREE.MeshLambertMaterial({
+                color: 'black',
+                side: THREE.BackSide
+            });
+            outlineMaterial.onBeforeCompile = (shader) => {
+                const token = `#include <begin_vertex>`
+                const customTransform = `
+                    vec3 transformed = position + objectNormal*0.02;
+                `
+                shader.vertexShader =
+                    shader.vertexShader.replace(token, customTransform)
+            };
+
+            var treeGroups = [];
+            var treeModels = [];
+            var objGroups = [];
+            var treePositions = [];
+
+            var createOutline = function (geometry, material) {
+                const outlineScale = 1.03;
+                var objOutline = new THREE.Mesh(geometry, material);
+                objOutline.scale.set(outlineScale, outlineScale, outlineScale);
+                return objOutline;
+            }
+
+            var treeOutlineMaterial = new THREE.MeshLambertMaterial({
+                color: 'black',
+                side: THREE.BackSide
+            });
+
+            var treeMaterials = [
+                new THREE.MeshToonMaterial({
+                    color: new THREE.Color(0x3b802f),
+                    specular: specularColor,
+                    reflectivity: beta,
+                    shininess: specularShininess,
+                    side: THREE.FrontSide
+                }),
+                new THREE.MeshToonMaterial({
+                    color: new THREE.Color(0xa67344),
+                    specular: specularColor,
+                    reflectivity: beta,
+                    shininess: specularShininess,
+                    side: THREE.FrontSide
+                })
+            ];
+
+            var objectsLoaded = 0;
+            var kangarooModel;
+            var boneModel;
+
+            var onTreesLoaded = function (treeObject) {
+                var treeGroup = new THREE.Group();
+
+                treeObject.children[0].material = treeMaterials;
+                treeModels.push(treeObject.children[0]);
+                objectsLoaded++;
+
+                if (objectsLoaded == 7) {
+                    histPopulateForest(histMarkerRoot);
+                    newPopulateForest(nowMarkerRoot);
+                }
+            };
+
+            var onObjectLoading = function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            }
+
+            var onObjectLoadError = function (error) {
+                console.log('An error has happened');
+            }
+
+            var loadObject = function (path, scale, kangarooColour, model) {
+                loader.load(
+                    path,
+                    function (object) {
+
+                        object.children[0].material = new THREE.MeshToonMaterial({
+                            color: kangarooColour,
+                            specular: specularColor,
+                            reflectivity: beta,
+                            shininess: specularShininess,
+                            side: THREE.FrontSide
+                        });
+                        if (model == 0) {
+                            kangarooModel = object.children[0];
+                        } else if (model == 1) {
+                            boneModel = object.children[0];
+                        }
+                        objectsLoaded++;
+
+                        if (objectsLoaded == 7) {
+                            newPopulateForest(nowMarkerRoot);
+                            histPopulateForest(histMarkerRoot);
+                        }
+                    },
+                    onObjectLoading,
+                    onObjectLoadError
+                )
+            }
+
+            for (let treeIndex = 1; treeIndex <= 5; treeIndex++) {
+                loader.load(
+                    'obj/Tree' + treeIndex + '/tree.obj',
+                    onTreesLoaded,
+                    onObjectLoading,
+                    onObjectLoadError
+                );
+            }
+            loadObject('obj/Kangaroo.obj', 0.2 * worldScale, kangarooColour, 0);
+            loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
+
+
+            var histPopulateForest = function (markerRoot) {
+                // Right side - filled with wildlife
+                var noise = 2 * worldScale;
+                var spacing = 16 * worldScale;
+                const rangeX = 40 * worldScale;
+                const rangeZ = 40 * worldScale;
+                var xPos = -rangeX;
+                var zPos = -rangeZ;
+                var kangaCount = Math.floor(rangeX / 25 / worldScale);
+
+                const treeSize = 10 * worldScale;
+
+                while (xPos <= rangeX) {
+                    zPos = -rangeZ;
+                    while (zPos <= rangeZ) {
+                        let treeIndex = Math.floor(Math.random() * 5 + 1);
+                        let treeMesh = treeModels[treeIndex - 1].clone();
+                        let treeObject = new THREE.Group();
+                        treeObject.add(treeMesh);
+                        treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
+                        treeObject.scale.set(treeSize, treeSize, treeSize);
+                        treeObject.rotation.y = Math.random() * Math.PI;
+                        var noiseX = Math.random() * noise * 2 - noise;
+                        var noiseZ = Math.random() * noise * 2 - noise;
+                        treeObject.position.set(xCamOffset + xPos + noiseX, yCamOffset, zCamOffset + zPos + noiseZ);
+                        markerRoot.add(treeObject);
+                        treeGroups.push(treeObject);
+
+                        zPos += spacing;
+                    }
+                    xPos += spacing;
+
+                    for (let k = 0; k < kangaCount; k++) {
+                        const kangaScale = 0.2 * worldScale;
+                        // Math.floor(Math.random() * (max - min + 1)) + min;
+                        let kangarooXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
+                        let kangarooZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
+                        let kangaroo = kangarooModel.clone();
+                        let kangarooObject = new THREE.Group();
+                        kangarooObject.add(kangaroo);
+                        kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
+                        kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
+                        kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
+                        kangarooObject.position.set(xCamOffset + kangarooXPos, yCamOffset, zCamOffset + kangarooZPos);
+                        markerRoot.add(kangarooObject);
+                    }
+                }
+            }
+
+            // New version of populate forest
+            var newPopulateForest = function (markerRoot) {
+                // Right side - filled with wildlife
+                var noise = 2 * worldScale;
+                var spacing = 40 * worldScale;
+                const rangeX = 40 * worldScale;
+                const rangeZ = 40 * worldScale;
+                var xPos = -rangeX;
+                var zPos = -rangeZ;
+                var boneCount = Math.floor(rangeX / 20 / worldScale);
+
+                const treeSize = 10 * worldScale;
+
+                while (xPos <= rangeX) {
+                    zPos = -rangeZ;
+                    while (zPos <= rangeZ) {
+                        let treeIndex = Math.floor(Math.random() * 5 + 1);
+                        let treeMesh = treeModels[treeIndex - 1].clone();
+                        let treeObject = new THREE.Group();
+                        treeObject.add(treeMesh);
+                        treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
+                        treeObject.scale.set(treeSize, treeSize, treeSize);
+                        treeObject.rotation.y = Math.random() * Math.PI;
+                        var noiseX = Math.random() * noise * 2 - noise;
+                        var noiseZ = Math.random() * noise * 2 - noise;
+                        treeObject.position.set(xCamOffset + xPos + noiseX, yCamOffset, zCamOffset + zPos + noiseZ);
+                        markerRoot.add(treeObject);
+                        treeGroups.push(treeObject);
+
+                        zPos += spacing;
+                    }
+                    xPos += spacing;
+
+                    for (let k = 0; k < boneCount; k++) {
+                        const boneScale = 0.008 * worldScale;
+                        // Math.floor(Math.random() * (max - min + 1)) + min;
+                        let boneXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
+                        let boneZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
+                        let bone = boneModel.clone();
+                        let boneObject = new THREE.Group();
+                        boneObject.add(bone);
+                        boneObject.add(createOutline(bone.geometry, outlineMaterial));
+                        boneObject.rotation.y = Math.random() * 2 * Math.PI;
+                        boneObject.scale.set(boneScale, boneScale, boneScale);
+                        boneObject.position.set(xCamOffset + boneXPos, yCamOffset, zCamOffset + boneZPos);
+                        markerRoot.add(boneObject);
+                    }
+                }
+            }
+        }
+
+
+        function update() {
+            // update artoolkit on every frame
+            if (arToolkitSource.ready !== false)
+                arToolkitContext.update(arToolkitSource.domElement);
+        }
+
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            deltaTime = clock.getDelta();
+            totalTime += deltaTime;
+            update();
+            render();
+        }
+
+    </script>
 
 </body>
+
 </html>
