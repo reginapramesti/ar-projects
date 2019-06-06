@@ -284,6 +284,7 @@
                         treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
                         treeObject.scale.set(treeSize, treeSize, treeSize);
                         treeObject.rotation.y = Math.random() * Math.PI;
+                        treeObject.rotation.x = Math.PI / 2;
                         var noiseX = Math.random() * noise * 2 - noise;
                         var noiseZ = Math.random() * noise * 2 - noise;
                         treeObject.position.set(xCamOffset + xPos + noiseX, yCamOffset, zCamOffset + zPos + noiseZ);
@@ -304,6 +305,7 @@
                         kangarooObject.add(kangaroo);
                         kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
                         kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
+                        kangarooObject.rotation.x = Math.PI / 2;
                         kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
                         kangarooObject.position.set(xCamOffset + kangarooXPos, yCamOffset, zCamOffset + kangarooZPos);
                         markerRoot.add(kangarooObject);
@@ -334,6 +336,7 @@
                         treeObject.add(createOutline(treeMesh.geometry, treeOutlineMaterial));
                         treeObject.scale.set(treeSize, treeSize, treeSize);
                         treeObject.rotation.y = Math.random() * Math.PI;
+                        treeObject.rotation.x = Math.PI / 2;
                         var noiseX = Math.random() * noise * 2 - noise;
                         var noiseZ = Math.random() * noise * 2 - noise;
                         treeObject.position.set(xCamOffset + xPos + noiseX, yCamOffset, zCamOffset + zPos + noiseZ);
@@ -354,6 +357,7 @@
                         boneObject.add(bone);
                         boneObject.add(createOutline(bone.geometry, outlineMaterial));
                         boneObject.rotation.y = Math.random() * 2 * Math.PI;
+                        boneObject.rotation.x = Math.PI;
                         boneObject.scale.set(boneScale, boneScale, boneScale);
                         boneObject.position.set(xCamOffset + boneXPos, yCamOffset, zCamOffset + boneZPos);
                         markerRoot.add(boneObject);
