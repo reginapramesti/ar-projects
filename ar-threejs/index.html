@@ -49,7 +49,7 @@
         function initialize() {
             scene = new THREE.Scene();
 
-            let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 1);
             scene.add(ambientLight);
 
             camera = new THREE.Camera();
@@ -131,7 +131,7 @@
 
             
             var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-            var material	= new THREE.MeshNormalMaterial();
+            var material	= new THREE.MeshLambertMaterial();
             mesh = new THREE.Mesh( geometry, material );
             mesh.position.y	= 0.5
             histMarkerRoot.add( mesh );
