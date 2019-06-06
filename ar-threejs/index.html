@@ -357,7 +357,7 @@
                         boneObject.add(bone);
                         boneObject.add(createOutline(bone.geometry, outlineMaterial));
                         boneObject.rotation.y = Math.random() * 2 * Math.PI;
-                        boneObject.rotation.x = Math.PI;
+                        boneObject.rotation.x = -Math.PI / 2;
                         boneObject.scale.set(boneScale, boneScale, boneScale);
                         boneObject.position.set(xCamOffset + boneXPos, yCamOffset, zCamOffset + boneZPos);
                         markerRoot.add(boneObject);
