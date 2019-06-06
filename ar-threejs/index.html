@@ -152,8 +152,8 @@
             var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 
             const xCamOffset = 0;
-            const yCamOffset = 0;
-            const zCamOffset = -10;
+            const yCamOffset = -20;
+            const zCamOffset = 0;
 
             var loader = new THREE.OBJLoader();
             var outlineMaterial = new THREE.MeshLambertMaterial({
@@ -298,21 +298,21 @@
                     }
                     xPos += spacing;
 
-                    for (let k = 0; k < kangaCount; k++) {
-                        const kangaScale = 0.2 * worldScale;
-                        // Math.floor(Math.random() * (max - min + 1)) + min;
-                        let kangarooXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
-                        let kangarooZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
-                        let kangaroo = kangarooModel.clone();
-                        let kangarooObject = new THREE.Group();
-                        kangarooObject.add(kangaroo);
-                        kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
-                        kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
-                        kangarooObject.rotation.x = -Math.PI / 2;
-                        kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
-                        kangarooObject.position.set(xCamOffset + kangarooXPos, yCamOffset, zCamOffset + kangarooZPos);
-                        markerRoot.add(kangarooObject);
-                    }
+                    // for (let k = 0; k < kangaCount; k++) {
+                    //     const kangaScale = 0.2 * worldScale;
+                    //     // Math.floor(Math.random() * (max - min + 1)) + min;
+                    //     let kangarooXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
+                    //     let kangarooZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
+                    //     let kangaroo = kangarooModel.clone();
+                    //     let kangarooObject = new THREE.Group();
+                    //     kangarooObject.add(kangaroo);
+                    //     kangarooObject.add(createOutline(kangaroo.geometry, outlineMaterial));
+                    //     kangarooObject.rotation.y = Math.random() * 2 * Math.PI;
+                    //     kangarooObject.rotation.x = -Math.PI / 2;
+                    //     kangarooObject.scale.set(kangaScale, kangaScale, kangaScale);
+                    //     kangarooObject.position.set(xCamOffset + kangarooXPos, yCamOffset, zCamOffset + kangarooZPos);
+                    //     markerRoot.add(kangarooObject);
+                    // }
                 }
             }
 
@@ -350,21 +350,21 @@
                     }
                     xPos += spacing;
 
-                    for (let k = 0; k < boneCount; k++) {
-                        const boneScale = 0.008 * worldScale;
-                        // Math.floor(Math.random() * (max - min + 1)) + min;
-                        let boneXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
-                        let boneZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
-                        let bone = boneModel.clone();
-                        let boneObject = new THREE.Group();
-                        boneObject.add(bone);
-                        boneObject.add(createOutline(bone.geometry, outlineMaterial));
-                        boneObject.rotation.y = Math.random() * 2 * Math.PI;
-                        boneObject.rotation.x = -Math.PI / 2;
-                        boneObject.scale.set(boneScale, boneScale, boneScale);
-                        boneObject.position.set(xCamOffset + boneXPos, yCamOffset, zCamOffset + boneZPos);
-                        markerRoot.add(boneObject);
-                    }
+                    // for (let k = 0; k < boneCount; k++) {
+                    //     const boneScale = 0.008 * worldScale;
+                    //     // Math.floor(Math.random() * (max - min + 1)) + min;
+                    //     let boneXPos = Math.floor(Math.random() * (rangeX / 2 + rangeX / 2 + 1)) - rangeX / 2;
+                    //     let boneZPos = Math.floor(Math.random() * (rangeZ / 2 + rangeZ / 2 + 1)) - rangeZ / 2;
+                    //     let bone = boneModel.clone();
+                    //     let boneObject = new THREE.Group();
+                    //     boneObject.add(bone);
+                    //     boneObject.add(createOutline(bone.geometry, outlineMaterial));
+                    //     boneObject.rotation.y = Math.random() * 2 * Math.PI;
+                    //     boneObject.rotation.x = -Math.PI / 2;
+                    //     boneObject.scale.set(boneScale, boneScale, boneScale);
+                    //     boneObject.position.set(xCamOffset + boneXPos, yCamOffset, zCamOffset + boneZPos);
+                    //     markerRoot.add(boneObject);
+                    // }
                 }
             }
         }
@@ -380,7 +380,7 @@
         function render() {
             treeGroups.forEach((treeGroup, index) => {
                 // treeGroup.rotation.y += 0.01;
-                treeGroup.position.z += 0.01;
+                treeGroup.position.y += 0.05;
             });
             renderer.render(scene, camera);
         }
