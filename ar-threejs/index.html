@@ -152,7 +152,7 @@
             var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 
             const xCamOffset = 0;
-            const yCamOffset = -50;
+            const yCamOffset = 50;
             const zCamOffset = 0;
 
             var loader = new THREE.OBJLoader();
@@ -380,7 +380,7 @@
         function render() {
             treeGroups.forEach((treeGroup, index) => {
                 // treeGroup.rotation.y += 0.01;
-                treeGroup.position.y += 0.05;
+                treeGroup.position.y -= 0.05;
             });
             renderer.render(scene, camera);
         }
