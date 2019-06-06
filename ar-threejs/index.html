@@ -129,7 +129,7 @@
 
             // three.js scene
 
-            var worldScale = 0.5;
+            var worldScale = 1;
             var alpha = 0;
             var beta = 0;
             var kangarooColour = new THREE.Color(0xcd6237);
@@ -248,18 +248,27 @@
             loadObject('obj/Kangaroo.obj', 0.2 * worldScale, kangarooColour, 0);
             loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
 
+            
+            var noise = 2 * worldScale;
+            var spacing = 8 * worldScale;
+            const rangeX = 20 * worldScale;
+            const rangeZ = 20 * worldScale;
+            var xPos = -rangeX;
+            var zPos = -rangeZ;
+            
+            const treeSize = 2 * worldScale;
 
             var histPopulateForest = function (markerRoot) {
                 // Left side - filled with wildlife
-                var noise = 2 * worldScale;
-                var spacing = 16 * worldScale;
-                const rangeX = 40 * worldScale;
-                const rangeZ = 40 * worldScale;
-                var xPos = -rangeX;
-                var zPos = -rangeZ;
+                // var noise = 2 * worldScale;
+                // var spacing = 16 * worldScale;
+                // const rangeX = 40 * worldScale;
+                // const rangeZ = 40 * worldScale;
+                // var xPos = -rangeX;
+                // var zPos = -rangeZ;
                 var kangaCount = Math.floor(rangeX / 25 / worldScale);
 
-                const treeSize = 5 * worldScale;
+                // const treeSize = 3 * worldScale;
 
                 while (xPos <= rangeX) {
                     zPos = -rangeZ;
@@ -301,15 +310,15 @@
             // New version of populate forest
             var newPopulateForest = function (markerRoot) {
                 // Right side - barren
-                var noise = 2 * worldScale;
-                var spacing = 40 * worldScale;
-                const rangeX = 40 * worldScale;
-                const rangeZ = 40 * worldScale;
-                var xPos = -rangeX;
-                var zPos = -rangeZ;
+                // var noise = 2 * worldScale;
+                // var spacing = 40 * worldScale;
+                // const rangeX = 40 * worldScale;
+                // const rangeZ = 40 * worldScale;
+                // var xPos = -rangeX;
+                // var zPos = -rangeZ;
                 var boneCount = Math.floor(rangeX / 20 / worldScale);
 
-                const treeSize = 5 * worldScale;
+                // const treeSize = 5 * worldScale;
 
                 while (xPos <= rangeX) {
                     zPos = -rangeZ;
