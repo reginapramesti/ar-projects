@@ -34,7 +34,7 @@
 
         var markerRoot1, markerRoot2;
 
-        var mesh1;
+        var mesh;
 
         
 
@@ -127,9 +127,19 @@
                 type: 'pattern', patternUrl: "data/letterB.patt",
             });
 
+            // Random loading torus knot
+
+            
+            var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
+            var material	= new THREE.MeshNormalMaterial();
+            mesh = new THREE.Mesh( geometry, material );
+            mesh.position.y	= 0.5
+            histMarkerRoot.add( mesh );
+            nowMarkerRoot.add( mesh );
+
             // three.js scene
 
-            var worldScale = 1;
+            var worldScale = 0.5;
             var alpha = 0;
             var beta = 0;
             var kangarooColour = new THREE.Color(0xcd6237);
@@ -197,6 +207,8 @@
                 if (objectsLoaded == 7) {
                     histPopulateForest(histMarkerRoot);
                     newPopulateForest(nowMarkerRoot);
+                    histMarkerRoot.remove(mesh);
+                    nowMarkerRoot.remove(mesh);
                 }
             };
 
@@ -230,6 +242,8 @@
                         if (objectsLoaded == 7) {
                             newPopulateForest(nowMarkerRoot);
                             histPopulateForest(histMarkerRoot);
+                            histMarkerRoot.remove(mesh);
+                            nowMarkerRoot.remove(mesh);
                         }
                     },
                     onObjectLoading,
@@ -247,25 +261,17 @@
             }
             loadObject('obj/Kangaroo.obj', 0.2 * worldScale, kangarooColour, 0);
             loadObject('obj/bone.obj', 0.00 * worldScale, 0xffffff, 1);
-
-            
-            var noise = 2 * worldScale;
-            var spacing = 8 * worldScale;
-            const rangeX = 20 * worldScale;
-            const rangeZ = 20 * worldScale;
-            var xPos = -rangeX;
-            var zPos = -rangeZ;
             
             const treeSize = 2 * worldScale;
 
             var histPopulateForest = function (markerRoot) {
                 // Left side - filled with wildlife
-                // var noise = 2 * worldScale;
-                // var spacing = 16 * worldScale;
-                // const rangeX = 40 * worldScale;
-                // const rangeZ = 40 * worldScale;
-                // var xPos = -rangeX;
-                // var zPos = -rangeZ;
+                var noise = 0.5 * worldScale;
+                var spacing =  2 * worldScale;
+                const rangeX = 3 * worldScale;
+                const rangeZ = 3 * worldScale;
+                var xPos = -rangeX;
+                var zPos = -rangeZ;
                 var kangaCount = Math.floor(rangeX / 25 / worldScale);
 
                 // const treeSize = 3 * worldScale;
@@ -310,12 +316,12 @@
             // New version of populate forest
             var newPopulateForest = function (markerRoot) {
                 // Right side - barren
-                // var noise = 2 * worldScale;
-                // var spacing = 40 * worldScale;
-                // const rangeX = 40 * worldScale;
-                // const rangeZ = 40 * worldScale;
-                // var xPos = -rangeX;
-                // var zPos = -rangeZ;
+                var noise = 3 * worldScale;
+                var spacing = 6 * worldScale;
+                const rangeX = 3 * worldScale;
+                const rangeZ = 3 * worldScale;
+                var xPos = -rangeX;
+                var zPos = -rangeZ;
                 var boneCount = Math.floor(rangeX / 20 / worldScale);
 
                 // const treeSize = 5 * worldScale;
@@ -370,6 +376,8 @@
             treeGroups.forEach((treeGroup, index) => {
                 // treeGroup.rotation.y += 0.01;
             });
+            mesh.rotation.y += 0.01;
+            mesh.rotation.z += 0.03;
             renderer.render(scene, camera);
         }
 
