@@ -36,6 +36,13 @@
 
         var mesh1;
 
+        
+
+        var treeGroups = [];
+        var treeModels = [];
+        var objGroups = [];
+        var treePositions = [];
+
         initialize();
         animate();
 
@@ -161,11 +168,6 @@
                 shader.vertexShader =
                     shader.vertexShader.replace(token, customTransform)
             };
-
-            var treeGroups = [];
-            var treeModels = [];
-            var objGroups = [];
-            var treePositions = [];
 
             var createOutline = function (geometry, material) {
                 const outlineScale = 1.03;
