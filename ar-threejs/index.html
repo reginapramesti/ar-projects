@@ -146,7 +146,7 @@
 
             const xCamOffset = 0;
             const yCamOffset = 0;
-            const zCamOffset = -100;
+            const zCamOffset = -30;
 
             var loader = new THREE.OBJLoader();
             var outlineMaterial = new THREE.MeshLambertMaterial({
@@ -378,7 +378,7 @@
         function render() {
             treeGroups.forEach((treeGroup, index) => {
                 // treeGroup.rotation.y += 0.01;
-                treeGroup.position.z += 0.01;
+                treeGroup.position.z += 0.1;
             });
             renderer.render(scene, camera);
         }
