@@ -104,18 +104,18 @@ ARjs.MarkersAreaUtils.createDefaultMarkersControlsParameters = function(tracking
 		// pattern hiro/kanji/a/b/c/f
 		var markersControlsParameters = [
 			// Default markers
-			{
-				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-hiro.patt',
-			},
-			{
-				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-arjs.patt',
-			},
-			{
-				type : 'pattern',
-				patternUrl : absoluteBaseURL + '/pattern-files/pattern-kanji.patt',
-			},
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-hiro.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-arjs.patt',
+			// },
+			// {
+			// 	type : 'pattern',
+			// 	patternUrl : absoluteBaseURL + '/pattern-files/pattern-kanji.patt',
+			// },
 			{
 				type : 'pattern',
 				patternUrl : absoluteBaseURL + '/pattern-files/pattern-letterA.patt',
