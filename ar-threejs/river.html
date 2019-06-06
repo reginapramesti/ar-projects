@@ -60,9 +60,9 @@
 	<a href='https://github.com/jeromeetienne/AR.js/' target='_blank'>AR.js</a> - Multi marker
 	by <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
 	</div>
-	<div id="narrativeText">
+	<!-- <div id="narrativeText">
 		<p id="text">If this keeps happening...</p>
-	</div>
+	</div> -->
 	<!-- info at the top of page -->
 	<div style='position: fixed; bottom: 10px; width:100%; text-align: center;z-index:1';>
 		<!-- tracking backend: 
@@ -73,16 +73,25 @@
 		<a href='javascript:void(0)' onclick='resetMarkerFile()'>reset area</a>
 	</div>
 	<!-- display record button -->
+	<div style='position: fixed; bottom: 16px; left: 16px; z-index:1';>
+		<style>
+			#recordButton:hover {
+				cursor: pointer;
+			}
+		</style>
+		<a href='stones.html'><img src="images/leftarrow.png" width='64px'  height='64px'></a>
+	</div>
+	
 	<div style='position: fixed; bottom: 16px; right: 16px; z-index:1';>
 		<style>
 			#recordButton:hover {
 				cursor: pointer;
 			}
 		</style>
-		<img id='recordButton' src="images/rightarrow.png" width='64px'  height='64px'>
+		<a id="potentialReset"><img id='recordButton' src="images/search.png" width='64px'  height='64px'></a>
 	</div>
 	
-	<div style='position: fixed; bottom: 16px; left: 16px; z-index:1';>
+	<!-- <div style='position: fixed; bottom: 16px; left: 16px; z-index:1';>
 			<style>
 				#flowerButton {
 					visibility: hidden;
@@ -92,7 +101,7 @@
 				}
 			</style>
 		<img id='flowerButton' src="images/flower.png" width='128px'  height='128px'>
-	</div>
+	</div> -->
 
 	<!-- ----------------------------------------------------------- -->
 <script>
@@ -136,48 +145,48 @@
 	var onRenderFcts= [];
 
 	onRenderFcts.push(function() {
-		if (markersLearned) {
-			if (clickCounter == 0) {
-				scene.background = null;
-				document.getElementById("text").innerHTML="";
-			} else if (clickCounter == 1) {
-				// clearScene(arWorldRoot);
-				scene.background = new THREE.Color(0xffffff);
-				document.getElementById("text").innerHTML="Can we even use those stepping stones anymore?";
-			} else if (clickCounter == 2) {
-				scene.background = null;
-				document.getElementById("text").innerHTML="";
-				//load stepping stones
-				// riverInit(arWorldRoot);
-				// stonesInit(arWorldRoot);
-			} else if (clickCounter == 3) {
-				// clearScene(arWorldRoot);
-				scene.background = new THREE.Color(0xffffff);
-				document.getElementById("text").innerHTML="Is there something we can do?";
-			} else if (clickCounter == 4) {
-				scene.background = null;
-				document.getElementById("text").innerHTML="";
-				document.getElementById("flowerButton").style.visibility='visible';
-				// riverInit(arWorldRoot);
-				// stonesInit(arWorldRoot);
-			} else if (clickCounter == 5) {
-				scene.background = null;
-				document.getElementById("text").innerHTML="";
-				// clearScene(arWorldRoot);
-				// wallsInit(arWorldRoot);
-				// riverInit(arWorldRoot);
-				// load the walls scene
-				document.getElementById("recordButton").src="images/closebook.png";
-				document.getElementById("flowerButton").style.visibility='hidden';
-			} else {
-				// clearScene(arWorldRoot);
-				scene.background = new THREE.Color(0xffffff);
-				document.getElementById("text").innerHTML="Thank you! I hope you enjoyed it!";
-				document.getElementById("recordButton").style.visibility='hidden';
-			}
-		} else {
-			scene.background = new THREE.Color(0xffffff);
-		}
+		// if (markersLearned) {
+		// 	if (clickCounter == 0) {
+		// 		scene.background = null;
+		// 		document.getElementById("text").innerHTML="";
+		// 	} else if (clickCounter == 1) {
+		// 		// clearScene(arWorldRoot);
+		// 		scene.background = new THREE.Color(0xffffff);
+		// 		document.getElementById("text").innerHTML="Can we even use those stepping stones anymore?";
+		// 	} else if (clickCounter == 2) {
+		// 		scene.background = null;
+		// 		document.getElementById("text").innerHTML="";
+		// 		//load stepping stones
+		// 		// riverInit(arWorldRoot);
+		// 		// stonesInit(arWorldRoot);
+		// 	} else if (clickCounter == 3) {
+		// 		// clearScene(arWorldRoot);
+		// 		scene.background = new THREE.Color(0xffffff);
+		// 		document.getElementById("text").innerHTML="Is there something we can do?";
+		// 	} else if (clickCounter == 4) {
+		// 		scene.background = null;
+		// 		document.getElementById("text").innerHTML="";
+		// 		document.getElementById("flowerButton").style.visibility='visible';
+		// 		// riverInit(arWorldRoot);
+		// 		// stonesInit(arWorldRoot);
+		// 	} else if (clickCounter == 5) {
+		// 		scene.background = null;
+		// 		document.getElementById("text").innerHTML="";
+		// 		// clearScene(arWorldRoot);
+		// 		// wallsInit(arWorldRoot);
+		// 		// riverInit(arWorldRoot);
+		// 		// load the walls scene
+		// 		document.getElementById("recordButton").src="images/closebook.png";
+		// 		document.getElementById("flowerButton").style.visibility='hidden';
+		// 	} else {
+		// 		// clearScene(arWorldRoot);
+		// 		scene.background = new THREE.Color(0xffffff);
+		// 		document.getElementById("text").innerHTML="Thank you! I hope you enjoyed it!";
+		// 		document.getElementById("recordButton").style.visibility='hidden';
+		// 	}
+		// } else {
+		// 	scene.background = new THREE.Color(0xffffff);
+		// }
 	})
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +211,9 @@
 	}
 	if (!markersLearned) {
 		document.getElementById("recordButton").src="images/search.png";
+	} else {
+		document.getElementById("recordButton").src="images/arrow-curved.png";
+		document.getElementById("potentialReset").href = "index.html";
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -321,26 +333,26 @@
 	//////////////////////////////////////////////////////////////////////////////
 	//		init UI
 	//////////////////////////////////////////////////////////////////////////////
-	var flowerCounter = 0;
-	document.querySelector('#flowerButton').addEventListener('click', function() {
-		flowerCounter++;
-		if (flowerCounter == 1) {
-			clearScene(arWorldRoot);
-			dataSource = rcp60;
-			riverInit(arWorldRoot);
-			stonesInit(arWorldRoot);
-		} else if (flowerCounter == 2) {
-			clearScene(arWorldRoot);
-			dataSource = rcp45;
-			riverInit(arWorldRoot);
-			stonesInit(arWorldRoot);
-		} else if (flowerCounter == 3) {
-			clearScene(arWorldRoot);
-			dataSource = rcp26;
-			riverInit(arWorldRoot);
-			stonesInit(arWorldRoot);
-		}
-	})
+	// var flowerCounter = 0;
+	// document.querySelector('#flowerButton').addEventListener('click', function() {
+	// 	flowerCounter++;
+	// 	if (flowerCounter == 1) {
+	// 		clearScene(arWorldRoot);
+	// 		dataSource = rcp60;
+	// 		riverInit(arWorldRoot);
+	// 		stonesInit(arWorldRoot);
+	// 	} else if (flowerCounter == 2) {
+	// 		clearScene(arWorldRoot);
+	// 		dataSource = rcp45;
+	// 		riverInit(arWorldRoot);
+	// 		stonesInit(arWorldRoot);
+	// 	} else if (flowerCounter == 3) {
+	// 		clearScene(arWorldRoot);
+	// 		dataSource = rcp26;
+	// 		riverInit(arWorldRoot);
+	// 		stonesInit(arWorldRoot);
+	// 	}
+	// })
 
 	document.querySelector('#recordButton').addEventListener('click', function(){
 		urlOptionsUpdate()
@@ -654,30 +666,17 @@
 			scene.add(wallFrontObject);
 
 			
-			let wallBackObject = new THREE.Group();
-			let wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
-			wallBackObject.add(wallBack);
-			wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
+			// let wallBackObject = new THREE.Group();
+			// let wallBack = new THREE.Mesh(wallGeometry, wallMaterials);
+			// wallBackObject.add(wallBack);
+			// wallBackObject.add(createOutline(wallGeometry, outlineMaterial));
 
-			wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
-        	wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
-			wallBackObject.position.z = -zPosition;
-			wallBackObject.position.z += zTotalOffset;
-			scene.add(wallBackObject);
+			// wallBackObject.position.x = -(totalWallLength / 2) + p * wallLength;
+        	// wallBackObject.position.y = yTotalOffset + (wallHeight / 2) * p;
+			// wallBackObject.position.z = -zPosition;
+			// wallBackObject.position.z += zTotalOffset;
+			// scene.add(wallBackObject);
 		}
-	}
-
-	var soundInit = function() {
-		
-		// Setup the sound files
-		var rainSE = new Audio("audio/heavyrain.mp3");
-		rainSE.loop = true;
-		
-		var listener = new THREE.AudioListener();
-		var audio = new THREE.Audio(listener);
-		audio.setMediaElementSource(rainSE);
-
-		rainSE.play();
 	}
 
 	var riverInit = function(scene) {
@@ -769,8 +768,8 @@
 		// arWorldRoot.add( mesh );
 		// wildlifeInit(arWorldRoot);
 		// wallsStonesInit(arWorldRoot);
-		soundInit();
-		riverInit(arWorldRoot);
+		// riverInit(arWorldRoot);
+		wallsInit(arWorldRoot);
 		// console.log(arWorldRoot);
 	})()
 

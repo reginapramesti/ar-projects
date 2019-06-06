@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Hello, AR Cubes!</title>
+    <!-- include three.js library -->
+    <script src='three.js/three.js'></script>
+    <script src='three.js/stats.min.js'></script>
+    <!-- include jsartookit -->
+    <script src="jsartoolkit5/artoolkit.min.js"></script>
+    <script src="jsartoolkit5/artoolkit.api.js"></script>
+    <!-- include threex.artoolkit -->
+    <script src="threex/threex-artoolkitsource.js"></script>
+    <script src="threex/threex-artoolkitcontext.js"></script>
+    <script src="threex/threex-arbasecontrols.js"></script>
+    <script src="threex/threex-armarkercontrols.js"></script>
+</head>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+    <div style='position: fixed; bottom: 16px; left: 16px; z-index:1';>
+		<style>
+			#recordButton:hover {
+				cursor: pointer;
+			}
+		</style>
+		<a href="index.html"><img id='recordButton' src="images/leftarrow.png" width='64px'  height='64px'></a>
+    </div>
+    <div style='position: fixed; bottom: 16px; right: 16px; z-index:1';>
+		<style>
+			#recordButton:hover {
+				cursor: pointer;
+			}
+		</style>
+		<a href="river.html"><img id='recordButton' src="images/rightarrow.png" width='64px'  height='64px'></a>
+	</div>
+    <!-- 
+  Example created by Lee Stemkoski: https://github.com/stemkoski
+  Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
+-->
+
+    <script>
+
+        var scene, camera, renderer, clock, deltaTime, totalTime;
+
+        var arToolkitSource, arToolkitContext;
+
+        var markerRoot1, markerRoot2;
+
+        var mesh;
+
+        initialize();
+        animate();
+
+        function initialize() {
+            scene = new THREE.Scene();
+
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 1);
+            scene.add(ambientLight);
+
+            camera = new THREE.Camera();
+            scene.add(camera);
+
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true
+            });
+            renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+            renderer.setSize(640, 480);
+            renderer.domElement.style.position = 'absolute'
+            renderer.domElement.style.top = '0px'
+            renderer.domElement.style.left = '0px'
+            document.body.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+            deltaTime = 0;
+            totalTime = 0;
+
+            ////////////////////////////////////////////////////////////
+            // setup arToolkitSource
+            ////////////////////////////////////////////////////////////
+
+            arToolkitSource = new THREEx.ArToolkitSource({
+                sourceType: 'webcam',
+            });
+
+            function onResize() {
+                arToolkitSource.onResize()
+                arToolkitSource.copySizeTo(renderer.domElement)
+                if (arToolkitContext.arController !== null) {
+                    arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)
+                }
+            }
+
+            arToolkitSource.init(function onReady() {
+                onResize()
+            });
+
+            // handle resize event
+            window.addEventListener('resize', function () {
+                onResize()
+            });
+
+            ////////////////////////////////////////////////////////////
+            // setup arToolkitContext
+            ////////////////////////////////////////////////////////////	
+
+            // create atToolkitContext
+            arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: 'data/camera_para.dat',
+                detectionMode: 'mono'
+            });
+
+            // copy projection matrix to camera when initialization complete
+            arToolkitContext.init(function onCompleted() {
+                camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            });
+
+            // three.js scene
+
+            var createOutline = function (geometry, material) {
+                const outlineScale = 1.03;
+                var objOutline = new THREE.Mesh(geometry, material);
+                objOutline.scale.set(outlineScale, outlineScale, outlineScale);
+                return objOutline;
+            }
+            var outlineMaterial = new THREE.MeshLambertMaterial({
+                color: 'black',
+                side: THREE.BackSide,
+            });
+            outlineMaterial.polygonOffset = true;
+            outlineMaterial.depthTest = true;
+            outlineMaterial.polygonOffsetFactor = 1000;
+            outlineMaterial.polygonOffsetUnits = 2;
+            outlineMaterial.onBeforeCompile = (shader) => {
+                const token = `#include <begin_vertex>`
+                const customTransform = `
+				vec3 transformed = position + objectNormal*0.02;
+			`
+                shader.vertexShader =
+                    shader.vertexShader.replace(token, customTransform)
+            };
+
+            const pebbleSpacing = 2.6;
+            const pebblePadding = 0;
+            const riverWidth = 60 * pebbleSpacing + pebblePadding;
+            // var xTotalOffset = -150;
+            // var yTotalOffset = -250;
+            // var zTotalOffset = -300;
+            const xTotalOffset = 0;
+            const yTotalOffset = 0;
+            const zTotalOffset = 0;
+
+            var stoneMeshes = [];
+            var wallFrontObjects = [];
+            var wallBackObjects = [];
+
+            const baseLevel = 15;
+
+            const dataScaleFactor = 3;
+            const zOffset = 2070; // so they will be positioned at 25, 15, 5, -5, -15, -25
+            const yOffset = 10;
+            const pebbleRotations = [-Math.PI / 15, Math.PI / 60, -Math.PI / 10, -Math.PI / 18, 0, 0];
+            var stoneMaterials = new THREE.MeshToonMaterial({
+                color: 0x786f74,
+            });
+            const stoneScale = 0.7;
+            const pebbleDepth = 8;
+            const bevelRadius = pebbleDepth / 2 + 0.1;
+            const rotationNoise = 0;//Math.PI / 3;
+
+            const partitions = 7;
+            const totalWallLength = 490;
+            const wallLength = totalWallLength / partitions; // 80 each section
+            const wallDepth = 3;
+            const xRepeat = 15 / partitions;
+            const yRepeat = 0.3 / partitions;
+            const zPosition = (riverWidth / 2) + (wallDepth / 2); // space between wall and river just because
+            var wallHeight = baseLevel / partitions * 3;
+
+
+            var stonesInit = function (dataSource, scene) {
+                
+                function createShapes() {
+
+                    var shapes = [];
+                    // Bottom to top
+
+                    // First pebble shape
+                    // Rotate -Math.PI / 15
+                    var shape = new THREE.Shape();
+                    shape.moveTo(-3, 3);
+                    shape.bezierCurveTo(-3, 3.5, -2.5, 4, -2, 4);
+                    shape.lineTo(2, 4);
+                    shape.bezierCurveTo(2.5, 4, 3, 3.5, 3, 3);
+                    shape.lineTo(3, -3);
+                    shape.bezierCurveTo(3, -3.5, 2.5, -4, 2, -4);
+                    shape.lineTo(-2, -4);
+                    shape.bezierCurveTo(-2.5, -4, -3, -3.5, -3, -3);
+                    shape.lineTo(-3, 3);
+                    shapes.push(shape);
+
+                    // Second pebble shape
+                    // Rotate Math.PI / 60
+                    shape = new THREE.Shape();
+                    shape.moveTo(-2, 3.5);
+                    shape.lineTo(2, 3.5); 3
+                    shape.bezierCurveTo(2.25, 3.5, 2.75, 3, 3, 2.5);
+                    shape.lineTo(4, -2.5);
+                    shape.bezierCurveTo(4, -3, 3.5, -3.5, 3, -3.5);
+                    shape.lineTo(-2, -4);
+                    shape.bezierCurveTo(-3, -4, -3.25, -3, -3.25, -2.5);
+                    shape.lineTo(-3, 2.5);
+                    shape.bezierCurveTo(-2.85, 3, -2.5, 3.5, -2, 3.5);
+                    shapes.push(shape);
+
+                    // Third pebble shape
+                    // Rotate -Math.PI / 10
+                    shape = new THREE.Shape();
+                    shape.moveTo(-3.5, 2);
+                    shape.bezierCurveTo(-3.5, 2.5, -3, 3, -2.5, 3);
+                    shape.lineTo(4.5, 3);
+                    shape.bezierCurveTo(4.75, 3, 5.25, 2.67, 5, 2);
+                    shape.lineTo(3.5, -2);
+                    shape.bezierCurveTo(3.25, -2.67, 2.75, -3, 2.5, -3);
+                    shape.lineTo(-2.5, -3);
+                    shape.bezierCurveTo(-3, -3, -3.5, -2.5, -3.5, -2);
+                    shape.lineTo(-3.5, 2);
+                    shapes.push(shape);
+
+                    // Fourth pebble shape
+                    // Rotate -Math.PI / 18;
+                    shape = new THREE.Shape();
+                    shape.moveTo(-3, 2);
+                    shape.bezierCurveTo(-3, 2.75, -2.75, 3, -2, 3);
+                    shape.lineTo(2, 3);
+                    shape.bezierCurveTo(2.75, 3, 3, 2.75, 3, 2);
+                    shape.lineTo(3, -2);
+                    shape.bezierCurveTo(3, -2.75, 2.75, -3, 2, -3);
+                    shape.lineTo(-2, -3);
+                    shape.bezierCurveTo(-2.75, -3, -3, -2.75, -3, -2);
+                    shape.lineTo(-3, 2);
+                    shapes.push(shape);
+
+                    // Fifth pebble shape
+                    // Rotate 0
+                    shape = new THREE.Shape();
+                    shape.moveTo(-4, 2);
+                    shape.bezierCurveTo(-4.1, 2.8, -3.25, 3, -3, 3);
+                    shape.lineTo(3, 3);
+                    shape.bezierCurveTo(3.25, 3, 4.75, 3, 4.5, 2);
+                    shape.lineTo(3.5, -2);
+                    shape.bezierCurveTo(3.4, -2.4, 3, -3, 2.5, -3);
+                    shape.lineTo(-2, -3);
+                    shape.bezierCurveTo(-2.5, -3, -3.25, -3, -3.5, -2);
+                    shape.lineTo(-4, 2);
+                    shapes.push(shape);
+
+                    // Sixth pebble shape
+                    // Rotate 0
+                    shape = new THREE.Shape();
+                    shape.moveTo(-5, 2);
+                    shape.bezierCurveTo(-5.28125, 2.75, -5, 3, -2, 3);
+                    shape.lineTo(2, 3);
+                    shape.bezierCurveTo(2.5, 3, 3.5, 3, 4, 2);
+                    shape.lineTo(5, 0);
+                    shape.bezierCurveTo(6, -2, 6, -3, 2, -3);
+                    shape.lineTo(-2, -3);
+                    shape.bezierCurveTo(-3, -3, -3.40625, -2.25, -3.5, -2);
+                    shape.lineTo(-5, 2);
+                    shapes.push(shape);
+
+                    return shapes;
+                }
+
+                var shapes = createShapes();
+
+                // Inspired by https://discourse.threejs.org/t/round-edged-box/1402
+                function createRoundedPebblesGeometry(shape, depth, radius0, smoothness) {
+                    let eps = 0.00001;
+                    let radius = radius0 - eps;
+                    let geometry = new THREE.ExtrudeGeometry(shape, {
+                        amount: depth - radius0 * 2,
+                        bevelEnabled: true,
+                        bevelSegments: smoothness * 2,
+                        steps: 1,
+                        bevelSize: radius,
+                        bevelThickness: radius0,
+                        curveSegments: smoothness
+                    });
+
+                    return geometry;
+                }
+
+                dataSource.forEach((rainfallValue, index) => {
+
+                    let pebbleCount = Math.ceil((baseLevel + rainfallValue.rainfall * dataScaleFactor) / pebbleDepth);
+
+                    for (let pebbleIx = 0; pebbleIx < pebbleCount; pebbleIx++) {
+                        let geometry = createRoundedPebblesGeometry(shapes[index], pebbleDepth, bevelRadius, 4);
+
+                        // Inspired by https://stackoverflow.com/questions/51509292/threejs-hemisphere
+                        for (var i = 0; i < geometry.vertices.length; i++) {
+                            var vertex = geometry.vertices[i];
+                            if (vertex.z > 0) {
+                                vertex.z = 0;
+                            }
+                        }
+
+                        geometry.computeFaceNormals();
+                        geometry.computeVertexNormals();
+                        geometry.verticesNeedUpdate = true;
+
+                        let mesh = new THREE.Mesh(geometry, stoneMaterials);
+
+                        let stoneObject = new THREE.Group();
+                        stoneObject.add(mesh);
+                        stoneObject.add(createOutline(geometry, outlineMaterial));
+                        stoneObject.scale.set(stoneScale, stoneScale, stoneScale);
+
+                        stoneObject.position.z = zTotalOffset + (zOffset - rainfallValue.year) * pebbleSpacing;
+                        stoneObject.position.y = yTotalOffset + yOffset + ((pebbleDepth / 2) * pebbleIx);
+                        stoneObject.position.x = xTotalOffset;
+                        stoneObject.rotation.x = -Math.PI / 2;
+                        stoneObject.rotation.z = pebbleRotations[index] + (Math.random() * rotationNoise * 2 - rotationNoise); // rotation along the y axis when upright
+
+                        stoneMeshes.push(stoneObject);
+                        scene.add(stoneObject);
+                    }
+                });
+
+
+            }
+
+            var rcp26 = [{ "year": 2040, "rainfall": 0.29618677 }, { "year": 2050, "rainfall": -0.533272 }, { "year": 2060, "rainfall": 5.5060167 }, { "year": 2070, "rainfall": 4.2879033 }, { "year": 2080, "rainfall": -2.9401066 }, { "year": 2090, "rainfall": -3.163458 }];
+            var rcp45 = [{ "year": 2040, "rainfall": -2.0570714 }, { "year": 2050, "rainfall": -0.19496697 }, { "year": 2060, "rainfall": -1.9939846 }, { "year": 2070, "rainfall": -5.0153384 }, { "year": 2080, "rainfall": 0.22340815 }, { "year": 2090, "rainfall": 2.7102447 }];
+            var rcp60 = [{ "year": 2040, "rainfall": -1.3998901 }, { "year": 2050, "rainfall": -2.1936162 }, { "year": 2060, "rainfall": -2.1142256 }, { "year": 2070, "rainfall": 2.386432 }, { "year": 2080, "rainfall": 10.35757 }, { "year": 2090, "rainfall": 5.697372 }];
+            var rcp85 = [{ "year": 2040, "rainfall": 0.91791856 }, { "year": 2050, "rainfall": 1.6345977 }, { "year": 2060, "rainfall": 0.35585436 }, { "year": 2070, "rainfall": 2.4581237 }, { "year": 2080, "rainfall": 7.7386603 }, { "year": 2090, "rainfall": 5.343646 }];
+
+            var dataArray = [rcp26, rcp45, rcp60, rcp85];
+            ////////////////////////////////////////////////////////////
+            // setup markerRoots
+            ////////////////////////////////////////////////////////////
+            patternArray = ["letterA", "letterB", "letterC", "letterD"];
+
+            for (let i = 0; i < patternArray.length; i++) {
+                let markerRoot = new THREE.Group();
+                scene.add(markerRoot);
+                let markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                    type: 'pattern', patternUrl: "data/" + patternArray[i] + ".patt",
+                });
+
+                stonesInit(dataArray[i], markerRoot);
+            }
+        }
+
+
+        function update() {
+            // update artoolkit on every frame
+            if (arToolkitSource.ready !== false)
+                arToolkitContext.update(arToolkitSource.domElement);
+        }
+
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            deltaTime = clock.getDelta();
+            totalTime += deltaTime;
+            update();
+            render();
+        }
+
+    </script>
+
+</body>
+
+</html>
