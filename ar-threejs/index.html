@@ -152,7 +152,7 @@
             var specularColor = new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2);
 
             const xCamOffset = 0;
-            const yCamOffset = -100;
+            const yCamOffset = -50;
             const zCamOffset = 0;
 
             var loader = new THREE.OBJLoader();
@@ -274,8 +274,8 @@
                 var zPos = -rangeZ;
                 var kangaCount = Math.floor(rangeX / 25 / worldScale);
 
-                // const treeSize = 10 * worldScale;
-                const treeSize = 1 * worldScale;
+                const treeSize = 10 * worldScale;
+                // const treeSize = 1 * worldScale;
 
                 while (xPos <= rangeX) {
                     zPos = -rangeZ;
@@ -327,7 +327,7 @@
                 var zPos = -rangeZ;
                 var boneCount = Math.floor(rangeX / 20 / worldScale);
 
-                const treeSize = 1 * worldScale;
+                const treeSize = 10 * worldScale;
 
                 while (xPos <= rangeX) {
                     zPos = -rangeZ;
