@@ -341,6 +341,9 @@
             // setup markerRoots
             ////////////////////////////////////////////////////////////
             patternArray = ["low", "med", "high", "veryhigh"];
+            
+
+            var mesh = new THREE.AxisHelper()
 
             for (let i = 0; i < patternArray.length; i++) {
                 let markerRoot = new THREE.Group();
@@ -350,10 +353,8 @@
                 });
 
                 stonesInit(dataArray[i], markerRoot);
+                markerRoot.add(mesh)
             }
-
-            var mesh = new THREE.AxisHelper()
-            markerRoot.add(mesh)
         }
 
 
